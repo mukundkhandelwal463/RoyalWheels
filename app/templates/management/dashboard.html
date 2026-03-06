@@ -1,0 +1,153 @@
+{% extends "management/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+    <div class="dashboard-main">
+        <section class="panel hero dashboard-hero">
+            <div class="hero-row">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p class="muted">Overview of rentals, bookings and earnings</p>
+                </div>
+                <p class="welcome-pill">Welcome {{ request.user.first_name|default:request.user.username }}</p>
+            </div>
+            {% if legacy_booking_schema %}
+                <p class="schema-note">
+                    Booking profile columns are missing in DB. Run <code>python manage.py migrate</code> to unlock full customer details.
+                </p>
+            {% endif %}
+        </section>
+
+        <section class="stats-grid dashboard-kpis">
+            <article class="stat-card kpi-card">
+                <h3>Total Rentals</h3>
+                <p>{{ completed_bookings }}</p>
+                <span class="kpi-meta">Completed rides</span>
+            </article>
+            <article class="stat-card kpi-card">
+                <h3>Active Rentals</h3>
+                <p>{{ active_bookings }}</p>
+                <span class="kpi-meta">On road now</span>
+            </article>
+            <article class="stat-card kpi-card accent">
+                <h3>Total Revenue</h3>
+                <p>Rs {{ total_revenue }}</p>
+                <span class="kpi-meta">Gross earnings</span>
+            </article>
+            <article class="stat-card kpi-card">
+                <h3>Total Expenses</h3>
+                <p>Rs {{ total_expenses }}</p>
+                <span class="kpi-meta">Operating costs</span>
+            </article>
+            <article class="stat-card kpi-card accent-2">
+                <h3>Net Profit</h3>
+                <p>Rs {{ total_profit }}</p>
+                <span class="kpi-meta">Revenue minus expenses</span>
+            </article>
+        </section>
+
+        <section class="panel dashboard-table">
+            <div class="panel-head">
+                <h2>Currently Rented Vehicles</h2>
+                <span class="chip">{{ active_bookings }} Active</span>
+            </div>
+            <div class="table-wrap modern-table-wrap">
+                <table class="modern-table">
+                    <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Start</th>
+                        <th>Return</th>
+                        <th>Days</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for booking in active_rentals_rows %}
+                        <tr>
+                            <td><strong>{{ booking.vehicle.brand }} {{ booking.vehicle.name }}</strong></td>
+                            <td>{{ booking.customer_name }}</td>
+                            <td>{{ booking.customer_phone }}</td>
+                            <td>{{ booking.start_date }}{% if booking.start_time %} {{ booking.start_time }}{% endif %}</td>
+                            <td>{{ booking.end_date }}{% if booking.end_time %} {{ booking.end_time }}{% endif %}</td>
+                            <td>{{ booking.duration_days }}</td>
+                            <td class="amount-cell">Rs {{ booking.total_price }}</td>
+                            <td>
+                                {% if booking.payment_status == 'paid' %}
+                                    <span class="payment-badge paid">✓ Paid</span>
+                                {% elif booking.payment_status == 'cod' %}
+                                    <span class="payment-badge cod">COD</span>
+                                {% else %}
+                                    <span class="payment-badge pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" action="{% url 'booking_decision' booking.id %}" class="action-form">
+                                    {% csrf_token %}
+                                    <button type="submit" name="decision" value="complete" class="complete-btn">Complete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="empty-row">No active rentals</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel dashboard-table">
+            <div class="panel-head">
+                <h2>Pending Booking Requests</h2>
+                <span class="chip">{{ pending_bookings|length }} Pending</span>
+            </div>
+            <div class="table-wrap modern-table-wrap">
+                <table class="modern-table">
+                    <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Dates</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for booking in pending_bookings %}
+                        <tr>
+                            <td><strong>{{ booking.vehicle.brand }} {{ booking.vehicle.name }}</strong></td>
+                            <td>{{ booking.customer_name }}</td>
+                            <td>{{ booking.customer_phone }}</td>
+                            <td>
+                                {{ booking.start_date }}{% if booking.start_time %} {{ booking.start_time }}{% endif %}
+                                to
+                                {{ booking.end_date }}{% if booking.end_time %} {{ booking.end_time }}{% endif %}
+                            </td>
+                            <td>Rs {{ booking.total_price }}</td>
+                            <td>
+                                <form method="post" action="{% url 'booking_decision' booking.id %}" class="action-form">
+                                    {% csrf_token %}
+                                    <button type="submit" name="decision" value="accept" class="accept-btn">Accept</button>
+                                    <button type="submit" name="decision" value="reject" class="reject-btn">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-row">No pending bookings</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+{% endblock %}

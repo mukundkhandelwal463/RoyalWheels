@@ -1,0 +1,155 @@
+:root {
+    --ink: #dbe5f4;
+    --panel: #25324a;
+    --panel-2: #34435f;
+    --gold: #d9ad2b;
+    --teal: #0f8f82;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: auto;
+    font-family: "Manrope", "Segoe UI", sans-serif;
+    background:rgb(17, 2, 94);
+    color: var(--ink);
+}
+
+.admin-signup-page {
+    display: grid;
+    place-items: center;
+    padding: 1.2rem;
+}
+
+/* Keep the same navbar style as home, but make Royal white on login page */
+.navbar .logo-royal {
+    color: #ffffff;
+}
+
+.login-shell {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 7.2rem 1.2rem 1.2rem;
+}
+
+.auth-container {
+  width:100%;
+  max-width:500px;
+  background:linear-gradient(180deg, rgba(16, 30, 57, 0.82), rgba(17, 36, 68, 0.86));
+  backdrop-filter:blur(12px);
+  padding:34px;
+  border-radius:22px;
+  margin:80px auto;
+  border:1px solid rgba(148, 163, 184, 0.26);
+  box-shadow:0 28px 70px rgba(2, 8, 23, 0.5);
+  box-sizing:border-box;
+  position:relative;
+  overflow:hidden;
+}
+
+.auth-container h1 {
+    margin: 0 0 0.2rem;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+.brand-royal {
+    color: #ffffff;
+}
+
+.brand-wheels {
+    color: var(--gold);
+}
+
+.auth-container h2 {
+    margin: 0 0 1rem;
+    text-align: center;
+    font-size: 1.9rem;
+    color: #eef4ff;
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 0.8rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid #4a5a7b;
+    background: var(--panel-2);
+    color: #eef3fd;
+    margin-bottom: 0.75rem;
+}
+
+.otp-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 0.8fr;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.otp-btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 0.7rem 0.5rem;
+    background: #1f6ab0;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-container input::placeholder {
+    color: #a9b6cb;
+}
+
+.auth-container button {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    padding: 0.78rem;
+    background: #f4c027;
+    color: #21304a;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.switch {
+    text-align: center;
+    margin: 0.8rem 0 0;
+    color: #b8c5da;
+}
+
+.switch a {
+    color: #fff;
+}
+
+.auth-meta {
+    text-align: center;
+    margin: 0.7rem 0 0;
+}
+
+.auth-meta a {
+    color: #dbe5f4;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.auth-message {
+    margin: 0 0 0.8rem;
+    padding: 0.62rem 0.7rem;
+    border-radius: 8px;
+    background: #3b4d6f;
+    border: 1px solid #62769e;
+    color: #eef5ff;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+    .login-shell {
+        padding-top: 8.5rem;
+    }
+}

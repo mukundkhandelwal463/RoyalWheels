@@ -1,0 +1,84 @@
+{% extends "management/base.html" %}
+
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+<section class="panel page-hero">
+    <div class="panel-head">
+        <h1>Expense and Profit</h1>
+        <span class="chip">{{ expenses|length }} Records</span>
+    </div>
+    <p class="muted">Track all spending and monitor business profit.</p>
+</section>
+
+<section class="stats-grid dashboard-kpis">
+    <article class="stat-card kpi-card">
+        <h3>Revenue</h3>
+        <p>Rs {{ total_revenue }}</p>
+        <span class="kpi-meta">Total earnings</span>
+    </article>
+    <article class="stat-card kpi-card">
+        <h3>Expenses</h3>
+        <p>Rs {{ total_expenses }}</p>
+        <span class="kpi-meta">Total costs</span>
+    </article>
+    <article class="stat-card kpi-card accent">
+        <h3>Profit</h3>
+        <p>Rs {{ total_profit }}</p>
+        <span class="kpi-meta">Current net</span>
+    </article>
+</section>
+
+<section class="split split-wide">
+    <article class="panel form-panel">
+        <div class="panel-head">
+            <h2>Add Expense</h2>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="error">{{ field.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit">Add Expense</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Expense History</h2>
+        </div>
+        <div class="table-wrap modern-table-wrap">
+            <table class="modern-table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense.title }}</td>
+                        <td>{{ expense.spent_on }}</td>
+                        <td>Rs {{ expense.amount }}</td>
+                        <td>{{ expense.notes|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-row">No expenses added yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+{% endblock %}

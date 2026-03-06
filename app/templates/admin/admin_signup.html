@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Signup | RoyalWheels</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/admin/admin_login.css' %}">
+</head>
+<body class="admin-signup-page">
+
+<div class="auth-container">
+  <h2>Create Account</h2>
+  {% if messages %}
+    {% for message in messages %}
+      <p class="auth-message">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+  <form method="post" action="{% url 'admin_signup_page' %}">
+    {% csrf_token %}
+    <input name="shop" id="shop" placeholder="Shop Name" required>
+    <input name="owner" id="owner" placeholder="Owner Name" required>
+    <input name="email" id="email" placeholder="Email" type="email" required>
+    <div class="otp-row">
+      <input type="text" id="adminSignupEmailOtp" placeholder="Email OTP">
+      <button type="button" id="sendAdminSignupEmailOtp" class="otp-btn">Send Email OTP</button>
+      <button type="button" id="verifyAdminSignupEmailOtp" class="otp-btn">Verify</button>
+    </div>
+    <input name="phone" id="phone" placeholder="+91XXXXXXXXXX" value="+91" required>
+    <input name="address" id="address" placeholder="Shop Address">
+    <input name="gst" id="gst" placeholder="GST Number">
+    <input name="photo_url" id="photo_url" placeholder="Profile Photo URL (optional)">
+    <input name="password" id="password" type="password" placeholder="Password" required>
+    <button type="submit">Signup</button>
+  </form>
+
+  <p class="switch">
+    Already have an account? <a href="{% url 'admin_login_page' %}">Login</a>
+  </p>
+</div>
+
+<script src="{% static 'js/admin/admin_otp.js' %}"></script>
+</body>
+</html>

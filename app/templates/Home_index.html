@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoyalWheels | Premium Car & Bike Rentals</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{% static 'css/home_style.css' %}?v=20260306" />
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+</head>
+<body>
+<nav class="navbar">
+    <section class="hero-image">
+      <a href="Home_index.html" style="text-decoration: none; color: inherit;">
+        <img src="{% static 'assets/logo.jpg' %}" alt="RoyalWheels logo" />
+      </a>
+    </section>
+
+    <div class="logo">
+      <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="Home_index.html" style="text-decoration: none; color: inherit;">Home</a></li>
+      <li><a href="Bikes.html" style="text-decoration: none; color: inherit;">Bikes</a></li>
+      <li><a href="Car.html" style="text-decoration: none; color: inherit;">Cars</a></li>
+      <li><a href="MyBooking.html" style="text-decoration: none; color: inherit;">My Bookings</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="search-wrapper">
+        <input type="text" placeholder="Search vehicles" />
+        <span class="search-icon" aria-hidden="true">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+      </div>
+
+      <button class="btn-outline" onclick="window.location.href='/admin-login/'">Admin</button>
+      <button class="btn-primary" onclick="window.location.href='login.html'">Login</button>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero reveal">
+      <div class="hero-content">
+        <p class="hero-eyebrow">Fast booking. Trusted partners. Premium experience.</p>
+        <h1>Find the right <span class="logo-wheels">car or bike</span> for your next ride</h1>
+        <p class="hero-subtitle">Choose from verified rental partners across your city and book in minutes.</p>
+
+        <div class="search-container">
+          <div class="search-field">
+            <label>Vehicle Type</label>
+            <select>
+              <option>Select vehicle type</option>
+              <option>Cars</option>
+              <option>Bikes</option>
+            </select>
+          </div>
+
+          <div class="search-field">
+            <label>Pick-up Date</label>
+            <input type="date" id="pickupDate" />
+          </div>
+
+          <div class="search-field">
+            <label>Return Date</label>
+            <input type="date" id="returnDate" />
+          </div>
+
+          <button class="search-btn">Search</button>
+        </div>
+
+        <div class="hero-metrics">
+          <div><strong>{{ total_vehicles }}</strong><span>Vehicles</span></div>
+          <div><strong>{{ total_partners }}</strong><span>Partners</span></div>
+          <div><strong>4.8/5</strong><span>Average Rating</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="featured reveal">
+      <h2><span class="logo-wheels">Trusted</span> Rental Partners</h2>
+      <p>Verified bike and car rental service providers near you</p>
+      <div class="cards" id="partnerCards">
+        {% for partner in partners %}
+          <article class="card">
+            <img
+              src="{% if partner.profile_photo %}{{ partner.profile_photo.url }}?v={{ partner.updated_at|date:'U' }}{% elif partner.profile_photo_url %}{{ partner.profile_photo_url }}{% else %}{% static 'assets/logo.jpg' %}{% endif %}"
+              alt="{{ partner.business_name }}"
+              class="provider-img"
+            >
+            <h3>{{ partner.business_name }}</h3>
+            <p class="location">{{ partner.address|default:"City not added" }}</p>
+            <p class="rating">Total Vehicles: {{ partner.total_vehicles }}</p>
+            <p class="service">{{ partner.cars_count }} Cars | {{ partner.bikes_count }} Bikes</p>
+            <button class="btn-outline view-vehicles-btn" onclick="window.location.href='/AllPartners.html'">View Vehicles</button>
+          </article>
+        {% empty %}
+          <p>No verified partners yet.</p>
+        {% endfor %}
+      </div>
+      <div class="view-all-wrapper">
+        <button class="view-all-btn">
+          <span>View All Partners</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="cta reveal">
+      <div class="cta-content">
+        <h2>Own a <span class="logo-wheels">premium</span> vehicle?</h2>
+        <p>
+          List your car or bike on RoyalWheels and start earning. We handle customer verification,
+          secure payments, and booking support so you can monetize your vehicle with confidence.
+        </p>
+        <button class="btn-white" onclick="window.location.href='/admin-login/'">List your vehicle</button>
+      </div>
+      <div class="cta-image">
+        <img src="{% static 'assets/hunter2.png' %}" alt="Luxury vehicle" />
+      </div>
+    </section>
+
+    <section class="testimonials reveal">
+      <div class="section-heading">
+        <h2>What our <span class="logo-wheels">customers</span> say</h2>
+        <p>Real feedback from riders and drivers who book with RoyalWheels.</p>
+      </div>
+
+      <div class="testimonial-cards">
+        <article class="testimonial">
+          <div class="testimonial-header">
+            <img src="{% static 'assets/hunter.png' %}" alt="Emma Rodriguez" />
+            <div>
+              <h4>Emma Rodriguez</h4>
+              <span>Barcelona, Spain</span>
+            </div>
+          </div>
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p>
+            I have rented from several platforms, and RoyalWheels stands out with clean vehicles,
+            smooth booking, and reliable support.
+          </p>
+        </article>
+
+        <article class="testimonial">
+          <div class="testimonial-header">
+            <img src="{% static 'assets/KG.jpeg' %}" alt="John Smith" />
+            <div>
+              <h4>John Smith</h4>
+              <span>New York, USA</span>
+            </div>
+          </div>
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p>
+            Booking took just a few clicks, the bike arrived on time, and the entire pickup process
+            was simple and transparent.
+          </p>
+        </article>
+
+        <article class="testimonial">
+          <div class="testimonial-header">
+            <img src="{% static 'assets/logo.jpg' %}" alt="Ava Johnson" />
+            <div>
+              <h4>Ava Johnson</h4>
+              <span>Sydney, Australia</span>
+            </div>
+          </div>
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p>
+            Great pricing, very professional delivery, and a premium feel from start to finish.
+            I will definitely book again.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="feedback reveal" id="feedbackSection">
+      <h2>Share your <span class="gold-text">Feedback</span></h2>
+      <p class="feedback-sub">Logged in users can share feedback. We’ll email it to RoyalWheels support and store it securely.</p>
+
+      <div class="feedback-card">
+        <div class="feedback-guest" id="feedbackGuest">
+          <p>Please login to submit feedback.</p>
+          <button class="btn-primary" type="button" onclick="window.location.href='login.html'">Login</button>
+        </div>
+
+        <form class="feedback-box" id="feedbackForm">
+          <div class="feedback-row">
+            <input type="text" id="feedbackName" placeholder="Your name (optional)" />
+            <input type="email" id="feedbackEmail" placeholder="Your email (optional)" />
+          </div>
+          <div class="feedback-row">
+            <select id="feedbackRating">
+              <option value="">Rating (optional)</option>
+              <option value="5">5 - Excellent</option>
+              <option value="4">4 - Good</option>
+              <option value="3">3 - Okay</option>
+              <option value="2">2 - Bad</option>
+              <option value="1">1 - Very bad</option>
+            </select>
+          </div>
+          <textarea id="feedbackMessage" rows="4" placeholder="Write your feedback..." required></textarea>
+          <button class="btn-primary" id="feedbackSubmitBtn" type="submit">Send Feedback</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+        </div>
+        <p>
+          Premium car and bike rental service with a wide selection of luxury and everyday vehicles.
+        </p>
+
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="Email">Mail</a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <a href="Home_index.html">Home</a>
+        <a href="Car.html">Browse Cars</a>
+        <a href="Bikes.html">Browse Bikes</a>
+        <a href="#">List Your Vehicle</a>
+        <a href="#">About Us</a>
+      </div>
+
+      <div class="footer-links">
+        <h4>Resources</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Insurance</a>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Contact</h4>
+        <p>LPU, Phagwara, Punjab</p>
+        <p>+91 63764 47286</p>
+        <p>support@royalwheels.com</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 RoyalWheels. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/navbar.js' %}"></script>
+  <script src="{% static 'js/app.js' %}?v=20260306"></script>
+</body>
+</html>

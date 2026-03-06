@@ -1,0 +1,249 @@
+{% extends "management/base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<section class="panel page-hero">
+    <div class="panel-head">
+        <h1>Owner Profile</h1>
+        <span class="chip">Business Profile</span>
+    </div>
+    <p class="muted">Create or update your rental business profile.</p>
+</section>
+
+<section class="split split-wide">
+    <article class="panel form-panel">
+        <div class="panel-head">
+            <h2>Profile Details</h2>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="photo-editor">
+                <img
+                    id="profilePhotoPreview"
+                    src="{% if owner and owner.profile_photo %}{{ owner.profile_photo.url }}{% elif owner and owner.profile_photo_url %}{{ owner.profile_photo_url }}{% else %}https://via.placeholder.com/120x120.png?text=Photo{% endif %}"
+                    alt="Profile Preview"
+                >
+                <div>
+                    <label for="{{ form.profile_photo.id_for_label }}">Upload Profile Photo (From PC)</label>
+                    {{ form.profile_photo }}
+                    <small class="muted">Choose an image from your computer.</small>
+                    {% if form.profile_photo.errors %}
+                        <small class="error">{{ form.profile_photo.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            {% for field in form %}
+                {% if field.name != "profile_photo_url" and field.name != "profile_photo" %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="error">{{ field.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+            <button type="submit">Save Profile</button>
+        </form>
+    </article>
+
+    <article class="panel info-panel">
+        <h3>Account Settings</h3>
+        <p class="muted">Manage your login credentials.</p>
+        
+        <div class="email-update-section">
+            <h4>Email Address</h4>
+            <p class="current-email">Current: <strong>{{ user.email }}</strong></p>
+            <div class="otp-row">
+                <input type="email" id="newEmail" placeholder="New Email Address">
+                <button type="button" id="sendEmailOtpBtn" class="otp-btn">Send OTP</button>
+            </div>
+            <div class="otp-row">
+                <input type="text" id="emailOtp" placeholder="Enter OTP">
+                <button type="button" id="verifyEmailOtpBtn" class="otp-btn">Verify & Update</button>
+            </div>
+            <p id="emailUpdateStatus" class="status-message"></p>
+        </div>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+        <h3>Profile Checklist</h3>
+        <p class="muted">Complete all business details to improve trust and booking conversion.</p>
+        <ul class="check-list">
+            <li>Business name and phone number</li>
+            <li>Accurate pickup address</li>
+            <li>License and verification details</li>
+            <li>Clear profile photo</li>
+        </ul>
+    </article>
+</section>
+
+<script>
+const otpState = {
+    profileEmail: {
+        email: { otpId: "", target: "", verified: false }
+    }
+};
+
+async function postJson(url, payload) {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+    const text = await response.text();
+    if (!response.ok) {
+        throw new Error(text || "Request failed");
+    }
+    return text ? JSON.parse(text) : {};
+}
+
+document.getElementById("sendEmailOtpBtn")?.addEventListener("click", async () => {
+    const newEmail = document.getElementById("newEmail")?.value?.trim();
+    if (!newEmail) {
+        alert("Please enter a new email address.");
+        return;
+    }
+    
+    const currentEmail = "{{ user.email|default:'' }}".toLowerCase();
+    if (newEmail.toLowerCase() === currentEmail) {
+        alert("Please enter a different email address.");
+        return;
+    }
+
+    try {
+        const data = await postJson("/api/otp/send/", {
+            purpose: "profile_email_update",
+            channel: "email",
+            target: newEmail
+        });
+
+        otpState.profileEmail.email = {
+            otpId: String(data.otp_id || ""),
+            target: String(newEmail),
+            verified: false
+        };
+
+        if (data.debug_otp) {
+            alert(`OTP sent successfully. Debug OTP: ${data.debug_otp}`);
+        } else {
+            alert("OTP sent successfully to your new email.");
+        }
+    } catch (error) {
+        alert(error.message || "Unable to send OTP.");
+    }
+});
+
+document.getElementById("verifyEmailOtpBtn")?.addEventListener("click", async () => {
+    const newEmail = document.getElementById("newEmail")?.value?.trim();
+    const otpCode = document.getElementById("emailOtp")?.value?.trim();
+    const statusEl = document.getElementById("emailUpdateStatus");
+
+    if (!newEmail) {
+        alert("Please enter a new email address.");
+        return;
+    }
+
+    const state = otpState.profileEmail.email;
+    if (!state.otpId || !state.target) {
+        alert("Please send OTP first.");
+        return;
+    }
+
+    if (state.target.toLowerCase() !== newEmail.toLowerCase()) {
+        alert("Email changed. Please resend OTP.");
+        state.otpId = "";
+        state.target = "";
+        return;
+    }
+
+    if (!otpCode) {
+        alert("Please enter the OTP.");
+        return;
+    }
+
+    try {
+        const data = await postJson("/api/otp/verify/", {
+            otp_id: state.otpId,
+            otp_code: otpCode
+        });
+
+        if (data.verified) {
+            state.verified = true;
+            
+            // Now update the email via API
+            const updateResponse = await postJson("/api/profile/update-email/", {
+                new_email: newEmail,
+                verified: true
+            });
+            
+            if (updateResponse.success) {
+                statusEl.textContent = "Email updated successfully!";
+                statusEl.className = "status-message success";
+                alert("Email updated successfully! Please login with your new email.");
+            } else {
+                statusEl.textContent = updateResponse.message || "Failed to update email.";
+                statusEl.className = "status-message error";
+            }
+        }
+    } catch (error) {
+        statusEl.textContent = error.message || "Verification failed.";
+        statusEl.className = "status-message error";
+    }
+});
+</script>
+
+<style>
+.email-update-section {
+    margin-bottom: 20px;
+}
+.email-update-section h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+.current-email {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+.otp-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.otp-row input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.otp-btn {
+    padding: 8px 16px;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.otp-btn:hover {
+    background: #4338ca;
+}
+.status-message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.status-message.success {
+    background: #d1fae5;
+    color: #065f46;
+}
+.status-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+</style>
+{% endblock %}

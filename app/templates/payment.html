@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+  <title>Payment | RoyalWheels</title>
+  <link rel="stylesheet" href="{% static 'css/payment_style.css' %}?v=20260306a">
+</head>
+<body>
+
+<div class="payment-container">
+  <p class="head">Complete Your Payment<span id="head"></span></p>
+
+  <div class="booking-summary">
+    <div class="payment-wrapper">
+      <div class="payment-left">
+        <h3 id="vehicleName"></h3>
+        <p class="pickup"><strong>Booking Type:</strong> <span id="bookingType"></span></p>
+        <p class="pickup"><strong>Pickup:</strong> <span id="pickup"></span></p>
+        <p class="return"><strong>Return:</strong> <span id="return"></span></p>
+        <p class="total">Total: <span id="total"></span></p>
+      </div>
+      <div class="payment-right">
+        <img id="vehicleImage" src="" alt="Vehicle image">
+      </div>
+    </div>
+  </div>
+
+  <div class="payment-method">
+    <h3>Select Payment Method</h3>
+
+    <label><input type="radio" name="method" value="upi"> UPI / Credit / Debit Card</label>
+    <label><input type="radio" name="method" value="cash"> Pay at Pickup</label>
+
+
+    <button onclick="processPayment()">Pay Now</button>
+  </div>
+
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="{% static 'js/payment.js' %}?v=20260306b"></script>
+</body>
+</html>

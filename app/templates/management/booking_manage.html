@@ -1,0 +1,104 @@
+{% extends "management/base.html" %}
+
+{% block title %}Bookings{% endblock %}
+
+{% block content %}
+<section class="panel page-hero">
+    <div class="panel-head">
+        <h1>Rental Management</h1>
+        <span class="chip">{{ bookings|length }} Bookings</span>
+    </div>
+    <p class="muted">Bookings are added automatically when users book vehicles. Review and accept/reject here.</p>
+</section>
+
+<section>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>My Bookings</h2>
+        </div>
+        <div class="table-wrap modern-table-wrap">
+            <table class="modern-table">
+                <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Vehicle</th>
+                    <th>Duration</th>
+                    <th>Total</th>
+                    <th>Advance</th>
+                    <th>Balance</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for booking in bookings %}
+                    <tr>
+                        <td>
+                            <div class="customer-cell">
+                                <strong>{{ booking.customer_name }}</strong>
+                                <span class="muted">{{ booking.customer_phone }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="vehicle-cell">
+                                <strong>{{ booking.vehicle.brand }} {{ booking.vehicle.name }}</strong>
+                                <span class="badge">{{ booking.get_rental_unit_display }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if booking.rental_unit == 'hour' %}
+                                {{ booking.duration_hours }} hrs
+                            {% else %}
+                                {{ booking.duration_days }} days
+                            {% endif %}
+                        </td>
+                        <td class="amount-cell">Rs {{ booking.total_price }}</td>
+                        <td class="amount-cell">Rs {{ booking.advance_paid|default:"0" }}</td>
+                        <td class="amount-cell balance-cell">Rs {{ booking.remaining_amount }}</td>
+                        <td>
+                            {% if booking.payment_status == 'paid' %}
+                                <span class="payment-badge paid">✓ Paid</span>
+                            {% else %}
+                                <span class="payment-badge pending">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if booking.status == "pending" %}
+                                <span class="status-badge is-warn">{{ booking.get_status_display }}</span>
+                            {% elif booking.status == "confirmed" %}
+                                <span class="status-badge is-ok">{{ booking.get_status_display }}</span>
+                            {% elif booking.status == "cancelled" %}
+                                <span class="status-badge is-off">{{ booking.get_status_display }}</span>
+                            {% else %}
+                                <span class="status-badge">{{ booking.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if booking.status == "pending" %}
+                                <form method="post" action="{% url 'booking_decision' booking.id %}" class="action-form">
+                                    {% csrf_token %}
+                                    <button type="submit" name="decision" value="accept" class="accept-btn">Accept</button>
+                                    <button type="submit" name="decision" value="reject" class="reject-btn">Reject</button>
+                                </form>
+                            {% elif booking.status == "confirmed" %}
+                                <form method="post" action="{% url 'booking_decision' booking.id %}" class="action-form">
+                                    {% csrf_token %}
+                                    <button type="submit" name="decision" value="complete" class="complete-btn">Complete</button>
+                                </form>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="9" class="empty-row">No bookings added yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search | RoyalWheels</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/modern_theme.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+</head>
+<body>
+  <nav class="navbar">
+    <section class="hero-image">
+      <a href="Home_index.html" style="text-decoration: none; color: inherit;">
+        <img src="{% static 'assets/logo.jpg' %}" alt="RoyalWheels logo" />
+      </a>
+    </section>
+    <div class="logo">
+      <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="Home_index.html" style="text-decoration: none; color: inherit;">Home</a></li>
+      <li><a href="Bikes.html" style="text-decoration: none; color: inherit;">Bikes</a></li>
+      <li><a href="Car.html" style="text-decoration: none; color: inherit;">Cars</a></li>
+      <li><a href="MyBooking.html" style="text-decoration: none; color: inherit;">My Bookings</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div class="search-wrapper">
+        <input type="text" placeholder="Search vehicles" value="{{ q|default:'' }}" />
+        <span class="search-icon" aria-hidden="true">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+      </div>
+      <button class="btn-outline" onclick="window.location.href='/admin-login/'">Admin</button>
+      <button class="btn-primary" onclick="window.location.href='login.html'">Login</button>
+    </div>
+  </nav>
+
+  <main class="search-page">
+    <header class="search-hero">
+      <h1>Search</h1>
+      <p class="search-subtitle">
+        {% if q %}Results for <strong>"{{ q }}"</strong>{% else %}Search cars, bikes, and partner names.{% endif %}
+      </p>
+
+      <form class="search-form" action="/Search.html" method="get" role="search" aria-label="Search cars, bikes and partners">
+        <div class="search-input">
+          <span class="search-input-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="2"/>
+              <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <input name="q" type="text" value="{{ q }}" placeholder="Search cars, bikes, partners..." autocomplete="off" />
+          <button class="search-submit" type="submit">Search</button>
+        </div>
+      </form>
+    </header>
+
+    {% if q and not cars and not bikes and not partners %}
+      <section class="empty-state">
+        <h2>No results</h2>
+        <p>Try searching by brand (e.g. BMW), vehicle name (e.g. Hunter), or partner name.</p>
+      </section>
+    {% endif %}
+
+    {% if cars %}
+      <section class="results-section">
+        <div class="results-title">
+          <h2>Cars</h2>
+          <a class="results-link" href="/Car.html?q={{ q|urlencode }}">View all cars</a>
+        </div>
+
+        <div class="cars-row search-grid">
+          {% for vehicle in cars %}
+            <div class="car-card search-card" data-vehicle-id="{{ vehicle.id }}" data-type="Car">
+              <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.brand }} {{ vehicle.name }}" class="car-img" />
+              <div class="car-info">
+                <h1 class="car-name">{{ vehicle.brand }} {{ vehicle.name }}</h1>
+                <p class="car-subtitle">Car - {{ vehicle.model_year }}</p>
+              </div>
+              <div class="car-specs">
+                <div class="spec">{{ vehicle.owner.business_name }}</div>
+                <div class="spec">{{ vehicle.seats }} Seats</div>
+                <div class="spec">{{ vehicle.get_fuel_type_display }}</div>
+                <div class="spec">{{ vehicle.transmission|default:"Manual" }}</div>
+              </div>
+              <div class="car-price">Rs {{ vehicle.rent_per_day }} <span>/ day</span></div>
+              <button class="book-btn">Book Now</button>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if bikes %}
+      <section class="results-section">
+        <div class="results-title">
+          <h2>Bikes</h2>
+          <a class="results-link" href="/Bikes.html?q={{ q|urlencode }}">View all bikes</a>
+        </div>
+
+        <div class="cars-row search-grid">
+          {% for vehicle in bikes %}
+            <div class="car-card search-card" data-vehicle-id="{{ vehicle.id }}" data-type="Bike">
+              <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.brand }} {{ vehicle.name }}" class="car-img" />
+              <div class="car-info">
+                <h1 class="car-name">{{ vehicle.brand }} {{ vehicle.name }}</h1>
+                <p class="car-subtitle">Bike - {{ vehicle.model_year }}</p>
+              </div>
+              <div class="car-specs">
+                <div class="spec">{{ vehicle.owner.business_name }}</div>
+                <div class="spec">{{ vehicle.seats }} Seats</div>
+                <div class="spec">{{ vehicle.get_fuel_type_display }}</div>
+                <div class="spec">{{ vehicle.transmission|default:"Manual" }}</div>
+              </div>
+              <div class="car-price">Rs {{ vehicle.rent_per_day }} <span>/ day</span></div>
+              <button class="book-btn">Book Now</button>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if partners %}
+      <section class="results-section">
+        <div class="results-title">
+          <h2>Partners</h2>
+          <a class="results-link" href="/AllPartners.html?q={{ q|urlencode }}">View all partners</a>
+        </div>
+
+        <section class="partners-detailed search-partners">
+          {% for partner in partners %}
+            <article class="partner-row">
+              <div class="partner-left">
+                <img
+                  src="{% if partner.profile_photo %}{{ partner.profile_photo.url }}?v={{ partner.updated_at|date:'U' }}{% elif partner.profile_photo_url %}{{ partner.profile_photo_url }}{% else %}{% static 'assets/logo.jpg' %}{% endif %}"
+                  alt="{{ partner.business_name }}"
+                  class="partner-logo"
+                >
+                <h2>{{ partner.business_name }}</h2>
+                <p class="rating">Vehicles: {{ partner.total_vehicles }}</p>
+              </div>
+              <div class="partner-right">
+                <p><strong>Address:</strong> {{ partner.address|default:"Address not added" }}</p>
+                <p><strong>Phone:</strong> {{ partner.phone_number|default:"Phone not added" }}</p>
+                <p><strong>Bikes:</strong> {{ partner.bikes_count }}</p>
+                <p><strong>Cars:</strong> {{ partner.cars_count }}</p>
+              </div>
+            </article>
+          {% endfor %}
+        </section>
+      </section>
+    {% endif %}
+  </main>
+
+  <footer class="footer">
+    <div class="footer-bottom">
+      <p>&copy; 2026 RoyalWheels. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/navbar.js' %}"></script>
+  <script src="{% static 'js/search.js' %}"></script>
+</body>
+</html>

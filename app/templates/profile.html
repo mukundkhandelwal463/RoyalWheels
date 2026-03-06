@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile | RoyalWheels</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/home_style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}?v=20260306f">
+</head>
+<body>
+
+<nav class="navbar">
+  <section class="hero-image">
+    <a href="Home_index.html" style="text-decoration: none; color: inherit;">
+      <img src="{% static 'assets/logo.jpg' %}" alt="RoyalWheels">
+    </a>
+  </section>
+
+  <div class="logo">
+    <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="Home_index.html" style="text-decoration: none; color: inherit;">Home</a></li>
+    <li><a href="Bikes.html" style="text-decoration: none; color: inherit;">Bikes</a></li>
+    <li><a href="Car.html" style="text-decoration: none; color: inherit;">Cars</a></li>
+    <li><a href="MyBooking.html" style="text-decoration: none; color: inherit;">My Bookings</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <div class="search-wrapper">
+      <input type="text" placeholder="Search cars">
+      <span class="search-icon">🔍</span>
+    </div>
+    <button class="btn-outline" onclick="window.location.href='/admin-login/'">Admin</button>
+    <button class="btn-primary" onclick="window.location.href='login.html'">Login</button>
+  </div>
+</nav>
+<!-- profile image -->
+<main class="profile-page">
+  <section class="profile-wrapper">
+    <aside class="profile-left">
+      <div class="profile-image-container">
+        <img src="{% static 'assets/Mountain.jpg' %}" class="profile-image" id="profileImage" alt="Profile Photo">
+      </div>
+
+      <label for="profilePhotoInput" class="upload-small-btn">Change Photo</label>
+      <input id="profilePhotoInput" type="file" accept="image/*" class="hidden-input">
+
+      <h2 class="profile-name" id="profileName">Guest User</h2>
+      <p class="profile-sub" id="profileEmail">guest@example.com</p>
+
+      <div class="profile-stats">
+        <p><strong>Cars Booked:</strong> <span id="carBookingsCount">0</span></p>
+        <p><strong>Bikes Booked:</strong> <span id="bikeBookingsCount">0</span></p>
+      </div>
+
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </aside>
+
+    <section class="profile-right">
+      <article class="profile-card">
+        <h3>Edit Profile Details</h3>
+        <form id="profileForm">
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="name">Full Name</label>
+              <input id="name" type="text" required>
+            </div>
+            <div class="form-row">
+              <label for="email">Email</label>
+              <input id="email" type="email" required>
+            </div>
+            <div class="form-row">
+              <label for="phone">Phone</label>
+              <input id="phone" type="tel">
+            </div>
+            <div class="form-row">
+              <label for="age">Age</label>
+              <input id="age" type="number" min="18">
+            </div>
+            <div class="form-row">
+              <label for="address">Address</label>
+              <input id="address" type="text">
+            </div>
+            <div class="form-row">
+              <label for="lpuId">LPU ID</label>
+              <input id="lpuId" type="text">
+            </div>
+            <div class="form-row">
+              <label for="license">Driving License Number</label>
+              <input id="license" type="text">
+            </div>
+            <div class="otp-row" id="profileEmailOtpRow">
+              <input type="text" id="profileEmailOtp" placeholder="Email OTP">
+              <button type="button" id="sendProfileEmailOtpBtn" class="otp-btn">Send OTP</button>
+              <button type="button" id="verifyProfileEmailOtpBtn" class="otp-btn">Verify</button>
+            </div>
+          </div>
+          <button type="submit" class="save-btn">Save Profile</button>
+        </form>
+      </article>
+
+      <article class="profile-card">
+        <h3>Change Password</h3>
+        <form id="passwordForm">
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="currentPassword">Current Password</label>
+              <input id="currentPassword" type="password" required>
+            </div>
+            <div class="form-row">
+              <label for="newPassword">New Password</label>
+              <input id="newPassword" type="password" required>
+            </div>
+            <div class="form-row">
+              <label for="confirmPassword">Confirm Password</label>
+              <input id="confirmPassword" type="password" required>
+            </div>
+          </div>
+          <div class="otp-row">
+            <input type="text" id="passwordEmailOtp" placeholder="Email OTP">
+            <button type="button" id="sendProfilePasswordEmailOtpBtn" class="otp-btn">Send OTP</button>
+            <button type="button" id="verifyProfilePasswordEmailOtpBtn" class="otp-btn">Verify</button>
+          </div>
+          <button type="submit" class="save-btn">Update Password</button>
+        </form>
+      </article>
+
+      <article class="profile-card">
+        <h3>Upload Documents</h3>
+        <form id="documentsForm">
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="licenseDoc">Driving License</label>
+              <input id="licenseDoc" type="file" accept=".jpg,.jpeg,.png,.pdf">
+            </div>
+            <div class="form-row">
+              <label for="collegeDoc">College ID Card</label>
+              <input id="collegeDoc" type="file" accept=".jpg,.jpeg,.png,.pdf">
+            </div>
+          </div>
+          <div class="otp-row">
+            <input type="text" id="docsEmailOtp" placeholder="Email OTP">
+            <button type="button" id="sendProfileDocsEmailOtpBtn" class="otp-btn">Send OTP</button>
+            <button type="button" id="verifyProfileDocsEmailOtpBtn" class="otp-btn">Verify</button>
+          </div>
+          <button type="submit" class="save-btn">Upload Documents</button>
+        </form>
+      </article>
+    </section>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <span style="color:aliceblue" class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+      </div>
+      <p>
+        Premium car and bike rental service with a wide selection of luxury and everyday vehicles.
+      </p>
+
+      <div class="social-icons">
+        <a href="#" aria-label="Facebook">FB</a>
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="Email">Mail</a>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <h4>Quick Links</h4>
+      <a href="Home_index.html">Home</a>
+      <a href="Car.html">Browse Cars</a>
+      <a href="Bikes.html">Browse Bikes</a>
+      <a href="#">List Your Vehicle</a>
+      <a href="#">About Us</a>
+    </div>
+
+    <div class="footer-links">
+      <h4>Resources</h4>
+      <a href="#">Help Center</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Insurance</a>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Contact</h4>
+      <p>LPU, Phagwara, Punjab</p>
+      <p>+91 63764 47286</p>
+      <p>support@royalwheels.com</p>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; 2026 RoyalWheels. All rights reserved.</p>
+    <div class="footer-bottom-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+
+<script src="{% static 'js/navbar.js' %}"></script>
+<script src="{% static 'js/auth.js' %}?v=20260306d"></script>
+<script src="{% static 'js/profile.js' %}?v=20260306f"></script>
+</body>
+</html>
