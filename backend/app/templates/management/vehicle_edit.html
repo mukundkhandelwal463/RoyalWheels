@@ -26,6 +26,11 @@
             <div class="field">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
+                {% if field.name == "photo" %}
+                    <small class="muted">Upload a new image here to replace the bike/car card image shown on the public page.</small>
+                {% elif field.name == "photo_url" %}
+                    <small class="muted">Use this only if you want to show an external image URL instead of an uploaded file.</small>
+                {% endif %}
                 {% if field.errors %}
                     <small class="error">{{ field.errors|striptags }}</small>
                 {% endif %}

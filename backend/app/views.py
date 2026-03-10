@@ -64,11 +64,11 @@ def _vehicle_image_url(vehicle):
         except Exception:
             pass
 
-    first_gallery_image = vehicle.images.first()
-    if first_gallery_image and getattr(first_gallery_image.image, "name", ""):
+    latest_gallery_image = vehicle.images.order_by("-created_at", "-id").first()
+    if latest_gallery_image and getattr(latest_gallery_image.image, "name", ""):
         try:
-            if first_gallery_image.image.storage.exists(first_gallery_image.image.name):
-                return first_gallery_image.image.url
+            if latest_gallery_image.image.storage.exists(latest_gallery_image.image.name):
+                return latest_gallery_image.image.url
         except Exception:
             pass
 

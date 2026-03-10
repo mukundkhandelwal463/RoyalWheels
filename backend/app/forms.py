@@ -25,15 +25,24 @@ class VehicleForm(forms.ModelForm):
             "brand",
             "model_year",
             "registration_number",
+            "photo",
+            "photo_url",
             "fuel_type",
             "seats",
             "transmission",
             "rent_per_day",
             "is_available",
-            "photo",
-            "photo_url",
             "notes",
         ]
+        labels = {
+            "photo": "Primary image upload",
+            "photo_url": "Primary image URL",
+        }
+        widgets = {
+            "photo": forms.ClearableFileInput(attrs={"accept": "image/*"}),
+            "photo_url": forms.URLInput(attrs={"placeholder": "Optional image URL"}),
+            "notes": forms.Textarea(attrs={"rows": 3}),
+        }
 
 
 class BookingForm(forms.ModelForm):
