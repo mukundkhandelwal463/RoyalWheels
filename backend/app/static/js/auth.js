@@ -77,6 +77,14 @@ function signup() {
     return;
   }
 
+  if (age) {
+    const numericAge = Number(age);
+    if (!Number.isInteger(numericAge) || numericAge < 18) {
+      alert("Age must be 18 or above.");
+      return;
+    }
+  }
+
   const customers = JSON.parse(localStorage.getItem("customers") || "[]");
   const legacyCustomer = JSON.parse(localStorage.getItem("customer") || "null");
   if (legacyCustomer && !customers.some((c) => c.email === legacyCustomer.email)) {

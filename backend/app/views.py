@@ -1025,30 +1025,10 @@ def customer_profile_upsert(request):
             next_age = int(age)
         except (TypeError, ValueError):
             return HttpResponseBadRequest("age must be a valid number.")
+        if next_age < 18:
+            return HttpResponseBadRequest("age must be 18 or above.")
 
     next_lpu_id = lpu_id or None
-
-    is_existing = bool(profile.pk)
-    changed_fields = []
-    if is_existing:
-        if original_snapshot["name"] != next_name:
-            changed_fields.append("name")
-        if original_snapshot["phone"] != next_phone:
-            changed_fields.append("phone")
-        if original_snapshot["age"] != next_age:
-            changed_fields.append("age")
-        if original_snapshot["address"] != next_address:
-            changed_fields.append("address")
-        if original_snapshot["lpu_id"] != (next_lpu_id or "").lower():
-            changed_fields.append("lpu_id")
-        if original_snapshot["license_number"] != next_license:
-            changed_fields.append("license_number")
-
-        if changed_fields and not (
-            _is_otp_verified(request, "customer_profile_update", "email", email)
-            or _is_otp_verified(request, "customer_profile_email", "email", email)
-        ):
-            return HttpResponseBadRequest("Please verify email OTP before saving profile changes.")
 
     profile.name = next_name
     profile.phone = next_phone
@@ -1059,10 +1039,6 @@ def customer_profile_upsert(request):
 
     driving_license_raw = payload.get("driving_license_doc") or payload.get("drivingLicenseDoc")
     student_id_raw = payload.get("student_id_doc") or payload.get("studentIdDoc")
-
-    docs_present = bool(driving_license_raw) or bool(student_id_raw)
-    if docs_present and not _is_otp_verified(request, "customer_profile_docs", "email", email):
-        return HttpResponseBadRequest("Please verify email OTP before uploading documents.")
 
     driving_license_doc = _decode_data_url_file(driving_license_raw, "customer_license")
     if driving_license_doc is None:
@@ -1108,9 +1084,6 @@ def customer_profile_update_email(request):
 
     if current_email == new_email:
         return JsonResponse({"updated": True, "email": new_email})
-
-    if not _is_otp_verified(request, "customer_profile_email", "email", new_email):
-        return HttpResponseBadRequest("Please verify email OTP first.")
 
     profile = CustomerProfile.objects.filter(email__iexact=current_email).first()
     if profile is None:
@@ -1425,6 +1398,8 @@ def create_booking(request):
             customer_age = int(customer_age)
         except (TypeError, ValueError):
             return HttpResponseBadRequest("customer_age must be a valid number.")
+        if customer_age < 18:
+            return HttpResponseBadRequest("customer_age must be 18 or above.")
 
     if (
         not vehicle_id

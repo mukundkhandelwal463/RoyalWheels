@@ -81,6 +81,15 @@ function setupProfileUpdate() {
 
     const currentEmail = String(user.email || "").trim();
     const newEmail = String(document.getElementById("email").value || "").trim();
+    const ageValue = String(document.getElementById("age").value || "").trim();
+
+    if (ageValue) {
+      const numericAge = Number(ageValue);
+      if (!Number.isInteger(numericAge) || numericAge < 18) {
+        alert("Age must be 18 or above.");
+        return;
+      }
+    }
 
     user.name = document.getElementById("name").value.trim();
     user.email = newEmail;
