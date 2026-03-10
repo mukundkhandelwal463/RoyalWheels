@@ -25,7 +25,7 @@ from django.db import connection
 from django.db.models import Count, Q
 from django.db.utils import OperationalError
 from django.templatetags.static import static
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import FileResponse, Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
@@ -85,6 +85,29 @@ def _vehicle_image_url(vehicle):
     if any(token in label for token in ["creta", "city", "verna", "baleno", "harrier", "xuv"]):
         return static("assets/hunter2.png")
     return static("assets/logo.jpg")
+
+
+def _existing_file_response(field_file, *, filename=None):
+    if not field_file or not getattr(field_file, "name", ""):
+        return None
+    try:
+        if not field_file.storage.exists(field_file.name):
+            return None
+        handle = field_file.open("rb")
+    except Exception:
+        return None
+    return FileResponse(handle, as_attachment=True, filename=filename or field_file.name.rsplit("/", 1)[-1])
+
+
+def _find_customer_profile_for_booking(booking):
+    lookup_lpu = (booking.customer_lpu_id or "").strip()
+    lookup_email = (booking.customer_email or "").strip()
+    profile = None
+    if lookup_lpu:
+        profile = CustomerProfile.objects.filter(lpu_id__iexact=lookup_lpu).first()
+    if profile is None and lookup_email:
+        profile = CustomerProfile.objects.filter(email__iexact=lookup_email).first()
+    return profile
 
 
 OTP_EXPIRY_SECONDS = 300
@@ -743,6 +766,49 @@ def booking_manage(request):
         "management/booking_manage.html",
         {"bookings": bookings, "owner": owner},
     )
+
+
+@login_required
+def booking_document_download(request, booking_id, document_type):
+    owner = OwnerProfile.objects.filter(user=request.user).first()
+    if not owner:
+        messages.error(request, "Create your owner profile first.")
+        return redirect("owner_profile_manage")
+
+    booking = get_object_or_404(Booking.objects.select_related("vehicle", "owner"), id=booking_id, owner=owner)
+
+    if document_type == "license":
+        response = _existing_file_response(
+            booking.driving_license_doc,
+            filename=f"{booking.customer_name or 'customer'}-driving-license",
+        )
+        if response:
+            return response
+        profile = _find_customer_profile_for_booking(booking)
+        response = _existing_file_response(
+            profile.driving_license_doc if profile else None,
+            filename=f"{booking.customer_name or 'customer'}-driving-license",
+        )
+        if response:
+            return response
+    elif document_type == "student-id":
+        response = _existing_file_response(
+            booking.student_id_doc,
+            filename=f"{booking.customer_name or 'customer'}-college-id",
+        )
+        if response:
+            return response
+        profile = _find_customer_profile_for_booking(booking)
+        response = _existing_file_response(
+            profile.student_id_doc if profile else None,
+            filename=f"{booking.customer_name or 'customer'}-college-id",
+        )
+        if response:
+            return response
+    else:
+        raise Http404("Unknown document type.")
+
+    raise Http404("Document file not found.")
 
 
 @login_required

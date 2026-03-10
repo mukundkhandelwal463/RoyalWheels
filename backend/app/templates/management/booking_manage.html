@@ -49,12 +49,12 @@
                                 {% endif %}
                                 <div class="doc-links">
                                     {% if booking.driving_license_doc %}
-                                        <a href="{{ booking.driving_license_doc.url }}" target="_blank" rel="noopener">Driving License</a>
+                                        <a href="{% url 'booking_document_download' booking.id 'license' %}">Driving License</a>
                                     {% else %}
                                         <span class="doc-missing">Driving License: Not uploaded</span>
                                     {% endif %}
                                     {% if booking.student_id_doc %}
-                                        <a href="{{ booking.student_id_doc.url }}" target="_blank" rel="noopener">College ID Card</a>
+                                        <a href="{% url 'booking_document_download' booking.id 'student-id' %}">College ID Card</a>
                                     {% else %}
                                         <span class="doc-missing">College ID Card: Not uploaded</span>
                                     {% endif %}
