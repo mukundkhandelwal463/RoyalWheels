@@ -1054,10 +1054,6 @@ def customer_profile_upsert(request):
     driving_license_raw = payload.get("driving_license_doc") or payload.get("drivingLicenseDoc")
     student_id_raw = payload.get("student_id_doc") or payload.get("studentIdDoc")
 
-    docs_present = bool(driving_license_raw) or bool(student_id_raw)
-    if docs_present and not _is_otp_verified(request, "customer_profile_docs", "email", email):
-        return HttpResponseBadRequest("Please verify email OTP before uploading documents.")
-
     driving_license_doc = _decode_data_url_file(driving_license_raw, "customer_license")
     if driving_license_doc is None:
         driving_license_doc = None

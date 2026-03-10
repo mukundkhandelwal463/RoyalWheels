@@ -333,20 +333,6 @@ function setupDocumentUpload() {
       return;
     }
 
-    const email = String(user.email || "").trim();
-    if (!email) {
-      alert("Please add your email in profile first.");
-      return;
-    }
-
-    if (
-      !otpState.customerProfileDocs?.email?.verified ||
-      String(otpState.customerProfileDocs.email.target || "").trim().toLowerCase() !== email.toLowerCase()
-    ) {
-      alert("Please verify email OTP before uploading documents.");
-      return;
-    }
-
     const licenseFile = document.getElementById("licenseDoc").files?.[0];
     const collegeFile = document.getElementById("collegeDoc").files?.[0];
 
@@ -395,8 +381,6 @@ function setupDocumentUpload() {
         alert(`Documents saved locally, but server save failed: ${error.message}`);
         return;
       }
-
-      otpState.customerProfileDocs.email.verified = false;
       alert("Documents uploaded successfully.");
     } catch (error) {
       alert("Unable to upload documents. Please try again.");

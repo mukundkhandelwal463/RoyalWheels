@@ -411,47 +411,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("sendProfileDocsEmailOtpBtn")?.addEventListener("click", async () => {
-    try {
-      const userEmail =
-        document.getElementById("email")?.value?.trim() ||
-        (() => {
-          try {
-            return JSON.parse(localStorage.getItem("loggedCustomer") || "null")?.email || "";
-          } catch (_) {
-            return "";
-          }
-        })();
-
-      await sendOtp("customerProfileDocs", "email", userEmail, "customer_profile_docs");
-    } catch (error) {
-      alert(error.message || "Unable to send documents email OTP.");
-    }
-  });
-
-  document.getElementById("verifyProfileDocsEmailOtpBtn")?.addEventListener("click", async () => {
-    try {
-      const userEmail =
-        document.getElementById("email")?.value?.trim() ||
-        (() => {
-          try {
-            return JSON.parse(localStorage.getItem("loggedCustomer") || "null")?.email || "";
-          } catch (_) {
-            return "";
-          }
-        })();
-
-      await verifyOtp(
-        "customerProfileDocs",
-        "email",
-        userEmail,
-        document.getElementById("docsEmailOtp")?.value?.trim()
-      );
-    } catch (error) {
-      alert(error.message || "Unable to verify documents email OTP.");
-    }
-  });
-
   document.getElementById("sendProfilePasswordEmailOtpBtn")?.addEventListener("click", async () => {
     try {
       const userEmail =
