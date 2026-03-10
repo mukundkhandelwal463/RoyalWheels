@@ -1,3 +1,25 @@
+const otpState = {
+  customerSignup: {
+    email: { otpId: "", target: "", verified: false },
+    phone: { otpId: "", target: "", verified: false }
+  },
+  customerForgot: {
+    email: { otpId: "", target: "", verified: false }
+  },
+  customerProfileEmail: {
+    email: { otpId: "", target: "", verified: false }
+  },
+  customerProfileUpdate: {
+    email: { otpId: "", target: "", verified: false }
+  },
+  customerProfileDocs: {
+    email: { otpId: "", target: "", verified: false }
+  },
+  customerProfilePassword: {
+    email: { otpId: "", target: "", verified: false }
+  }
+};
+
 async function postJson(url, payload) {
   const response = await fetch(url, {
     method: "POST",
@@ -11,6 +33,10 @@ async function postJson(url, payload) {
     throw new Error(text || "Request failed");
   }
   return text ? JSON.parse(text) : {};
+}
+
+function resetOtpFlowState(flow, channel) {
+  otpState[flow][channel] = { otpId: "", target: "", verified: false };
 }
 
 function normalizeIndianPhone(rawValue) {
@@ -34,10 +60,62 @@ function enforceIndianPhonePrefix(inputId) {
     input.value = normalizeIndianPhone(input.value);
   };
 
-  input.addEventListener("input", applyValue);
   if (input.value) {
     applyValue();
   }
+
+  input.addEventListener("focus", () => {
+    if (!input.value) {
+      input.value = "";
+    }
+  });
+  input.addEventListener("input", applyValue);
+}
+
+async function sendOtp(flow, channel, target, purpose) {
+  if (!target) {
+    alert(`Please enter ${channel} first.`);
+    return;
+  }
+
+  const data = await postJson("/api/otp/send/", {
+    purpose,
+    channel,
+    target
+  });
+
+  otpState[flow][channel] = {
+    otpId: String(data.otp_id || ""),
+    target: String(target).trim(),
+    verified: false
+  };
+
+  alert(data.message || "OTP sent successfully.");
+}
+
+async function verifyOtp(flow, channel, target, code) {
+  const state = otpState[flow][channel];
+  if (!state.otpId || !state.target) {
+    alert(`Please send ${channel} OTP first.`);
+    return;
+  }
+  if (String(state.target).trim() !== String(target).trim()) {
+    alert(`${channel} value changed. Please resend OTP.`);
+    resetOtpFlowState(flow, channel);
+    return;
+  }
+  if (!code) {
+    alert(`Please enter ${channel} OTP.`);
+    return;
+  }
+
+  await postJson("/api/otp/verify/", {
+    otp_id: state.otpId,
+    otp_code: String(code).trim()
+  });
+
+  otpState[flow][channel].verified = true;
+  alert(`${channel.toUpperCase()} OTP verified.`);
 }
 
 function signup() {
@@ -83,6 +161,14 @@ function signup() {
       alert("Age must be 18 or above.");
       return;
     }
+  }
+
+  if (
+    !otpState.customerSignup.email.verified ||
+    String(otpState.customerSignup.email.target).trim().toLowerCase() !== String(email).toLowerCase()
+  ) {
+    alert("Please verify your email OTP before signup.");
+    return;
   }
 
   const customers = JSON.parse(localStorage.getItem("customers") || "[]");
@@ -201,6 +287,14 @@ function resetCustomerPassword() {
     return;
   }
 
+  if (
+    !otpState.customerForgot.email.verified ||
+    String(otpState.customerForgot.email.target).trim().toLowerCase() !== String(email).toLowerCase()
+  ) {
+    alert("Please verify reset email OTP first.");
+    return;
+  }
+
   const customers = JSON.parse(localStorage.getItem("customers") || "[]");
   const legacyCustomer = JSON.parse(localStorage.getItem("customer") || "null");
   if (legacyCustomer && !customers.some((c) => c.email === legacyCustomer.email)) {
@@ -228,9 +322,174 @@ function resetCustomerPassword() {
   }
 
   alert("Password updated successfully. Please login.");
+  resetOtpFlowState("customerForgot", "email");
   window.location.href = "/login.html";
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   enforceIndianPhonePrefix("phone");
+
+  document.getElementById("sendEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      await sendOtp(
+        "customerSignup",
+        "email",
+        document.getElementById("email")?.value?.trim(),
+        "customer_signup"
+      );
+    } catch (error) {
+      alert(error.message || "Unable to send email OTP.");
+    }
+  });
+
+  document.getElementById("verifyEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      await verifyOtp(
+        "customerSignup",
+        "email",
+        document.getElementById("email")?.value?.trim(),
+        document.getElementById("emailOtp")?.value?.trim()
+      );
+    } catch (error) {
+      alert(error.message || "Unable to verify email OTP.");
+    }
+  });
+
+  document.getElementById("sendResetEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      await sendOtp(
+        "customerForgot",
+        "email",
+        document.getElementById("resetEmail")?.value?.trim(),
+        "customer_forgot"
+      );
+    } catch (error) {
+      alert(error.message || "Unable to send reset email OTP.");
+    }
+  });
+
+  document.getElementById("verifyResetEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      await verifyOtp(
+        "customerForgot",
+        "email",
+        document.getElementById("resetEmail")?.value?.trim(),
+        document.getElementById("resetEmailOtp")?.value?.trim()
+      );
+    } catch (error) {
+      alert(error.message || "Unable to verify reset email OTP.");
+    }
+  });
+
+  document.getElementById("sendProfileEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      const sendBtn = document.getElementById("sendProfileEmailOtpBtn");
+      const otpFlow = sendBtn?.dataset?.otpFlow || "customerProfileEmail";
+      const otpPurpose = sendBtn?.dataset?.otpPurpose || "customer_profile_email";
+      const otpTarget = sendBtn?.dataset?.otpTarget || document.getElementById("email")?.value?.trim();
+
+      await sendOtp(otpFlow, "email", otpTarget, otpPurpose);
+    } catch (error) {
+      alert(error.message || "Unable to send profile email OTP.");
+    }
+  });
+
+  document.getElementById("verifyProfileEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      const verifyBtn = document.getElementById("verifyProfileEmailOtpBtn");
+      const otpFlow = verifyBtn?.dataset?.otpFlow || "customerProfileEmail";
+      const otpTarget = verifyBtn?.dataset?.otpTarget || document.getElementById("email")?.value?.trim();
+
+      await verifyOtp(
+        otpFlow,
+        "email",
+        otpTarget,
+        document.getElementById("profileEmailOtp")?.value?.trim()
+      );
+    } catch (error) {
+      alert(error.message || "Unable to verify profile email OTP.");
+    }
+  });
+
+  document.getElementById("sendProfileDocsEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      const userEmail =
+        document.getElementById("email")?.value?.trim() ||
+        (() => {
+          try {
+            return JSON.parse(localStorage.getItem("loggedCustomer") || "null")?.email || "";
+          } catch (_) {
+            return "";
+          }
+        })();
+
+      await sendOtp("customerProfileDocs", "email", userEmail, "customer_profile_docs");
+    } catch (error) {
+      alert(error.message || "Unable to send documents email OTP.");
+    }
+  });
+
+  document.getElementById("verifyProfileDocsEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      const userEmail =
+        document.getElementById("email")?.value?.trim() ||
+        (() => {
+          try {
+            return JSON.parse(localStorage.getItem("loggedCustomer") || "null")?.email || "";
+          } catch (_) {
+            return "";
+          }
+        })();
+
+      await verifyOtp(
+        "customerProfileDocs",
+        "email",
+        userEmail,
+        document.getElementById("docsEmailOtp")?.value?.trim()
+      );
+    } catch (error) {
+      alert(error.message || "Unable to verify documents email OTP.");
+    }
+  });
+
+  document.getElementById("sendProfilePasswordEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      const userEmail =
+        document.getElementById("email")?.value?.trim() ||
+        (() => {
+          try {
+            return JSON.parse(localStorage.getItem("loggedCustomer") || "null")?.email || "";
+          } catch (_) {
+            return "";
+          }
+        })();
+
+      await sendOtp("customerProfilePassword", "email", userEmail, "customer_password_change");
+    } catch (error) {
+      alert(error.message || "Unable to send password change email OTP.");
+    }
+  });
+
+  document.getElementById("verifyProfilePasswordEmailOtpBtn")?.addEventListener("click", async () => {
+    try {
+      const userEmail =
+        document.getElementById("email")?.value?.trim() ||
+        (() => {
+          try {
+            return JSON.parse(localStorage.getItem("loggedCustomer") || "null")?.email || "";
+          } catch (_) {
+            return "";
+          }
+        })();
+
+      await verifyOtp(
+        "customerProfilePassword",
+        "email",
+        userEmail,
+        document.getElementById("passwordEmailOtp")?.value?.trim()
+      );
+    } catch (error) {
+      alert(error.message || "Unable to verify password change email OTP.");
+    }
+  });
 });

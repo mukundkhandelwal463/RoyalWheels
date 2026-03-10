@@ -96,6 +96,11 @@
               <label for="license">Driving License Number</label>
               <input id="license" type="text">
             </div>
+            <div class="otp-row" id="profileEmailOtpRow">
+              <input type="text" id="profileEmailOtp" placeholder="Email OTP">
+              <button type="button" id="sendProfileEmailOtpBtn" class="otp-btn">Send OTP</button>
+              <button type="button" id="verifyProfileEmailOtpBtn" class="otp-btn">Verify</button>
+            </div>
           </div>
           <button type="submit" class="save-btn">Save Profile</button>
         </form>
@@ -118,6 +123,11 @@
               <input id="confirmPassword" type="password" required>
             </div>
           </div>
+          <div class="otp-row">
+            <input type="text" id="passwordEmailOtp" placeholder="Email OTP">
+            <button type="button" id="sendProfilePasswordEmailOtpBtn" class="otp-btn">Send OTP</button>
+            <button type="button" id="verifyProfilePasswordEmailOtpBtn" class="otp-btn">Verify</button>
+          </div>
           <button type="submit" class="save-btn">Update Password</button>
         </form>
       </article>
@@ -134,6 +144,11 @@
               <label for="collegeDoc">College ID Card</label>
               <input id="collegeDoc" type="file" accept=".jpg,.jpeg,.png,.pdf">
             </div>
+          </div>
+          <div class="otp-row">
+            <input type="text" id="docsEmailOtp" placeholder="Email OTP">
+            <button type="button" id="sendProfileDocsEmailOtpBtn" class="otp-btn">Send OTP</button>
+            <button type="button" id="verifyProfileDocsEmailOtpBtn" class="otp-btn">Verify</button>
           </div>
           <button type="submit" class="save-btn">Upload Documents</button>
         </form>
@@ -197,7 +212,7 @@
 
 
 <script src="{% static 'js/navbar.js' %}"></script>
-<script src="{% static 'js/auth.js' %}?v=20260310b"></script>
-<script src="{% static 'js/profile.js' %}?v=20260306f"></script>
+<script src="{% static 'js/auth.js' %}?v=20260310c"></script>
+<script src="{% static 'js/profile.js' %}?v=20260310c"></script>
 </body>
 </html>
