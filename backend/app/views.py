@@ -40,14 +40,14 @@ logger = logging.getLogger(__name__)
 def _partners_queryset():
     return (
         OwnerProfile.objects.annotate(
-            total_vehicles=Count("vehicles", filter=Q(vehicles__is_verified=True)),
+            total_vehicles=Count("vehicles"),
             cars_count=Count(
                 "vehicles",
-                filter=Q(vehicles__category=Vehicle.Category.CAR, vehicles__is_verified=True),
+                filter=Q(vehicles__category=Vehicle.Category.CAR),
             ),
             bikes_count=Count(
                 "vehicles",
-                filter=Q(vehicles__category=Vehicle.Category.BIKE, vehicles__is_verified=True),
+                filter=Q(vehicles__category=Vehicle.Category.BIKE),
             ),
         )
         .filter(total_vehicles__gt=0, is_verified=True, user__is_active=True)
@@ -271,11 +271,7 @@ def home(request):
         request,
         "Home_index.html",
         {
-            "total_vehicles": Vehicle.objects.filter(
-                is_verified=True,
-                owner__is_verified=True,
-                owner__user__is_active=True,
-            ).count(),
+            "total_vehicles": Vehicle.objects.filter(owner__is_verified=True, owner__user__is_active=True).count(),
             "total_partners": partners_qs.count(),
             "partners": partners_qs[:6],
         },
@@ -285,7 +281,6 @@ def home(request):
 def cars_page(request):
     cars = Vehicle.objects.select_related("owner").prefetch_related("images").filter(
         category=Vehicle.Category.CAR,
-        is_verified=True,
         owner__is_verified=True,
         owner__user__is_active=True,
     )
@@ -298,7 +293,6 @@ def cars_page(request):
 def bikes_page(request):
     bikes = Vehicle.objects.select_related("owner").prefetch_related("images").filter(
         category=Vehicle.Category.BIKE,
-        is_verified=True,
         owner__is_verified=True,
         owner__user__is_active=True,
     )
@@ -317,7 +311,6 @@ def search_page(request):
     query = str(request.GET.get("q", "")).strip()
 
     vehicles_qs = Vehicle.objects.select_related("owner").prefetch_related("images").filter(
-        is_verified=True,
         owner__is_verified=True,
         owner__user__is_active=True,
     )
@@ -806,7 +799,6 @@ def profile_update_email(request):
 @require_GET
 def vehicle_list(request):
     vehicles = Vehicle.objects.select_related("owner").prefetch_related("images").filter(
-        is_verified=True,
         owner__is_verified=True,
         owner__user__is_active=True,
     )
@@ -1462,7 +1454,6 @@ def create_booking(request):
     vehicle = get_object_or_404(
         Vehicle.objects.select_related("owner"),
         id=vehicle_id,
-        is_verified=True,
         owner__is_verified=True,
         owner__user__is_active=True,
     )
