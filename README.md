@@ -21,8 +21,8 @@ This project is a Django app in `backend/` and is now set up for Render.
    - `GOOGLE_CLIENT_ID`
    - `RAZORPAY_KEY_ID`
    - `RAZORPAY_KEY_SECRET`
-   - `EMAIL_HOST_USER`
-   - `EMAIL_HOST_PASSWORD`
+   - `RESEND_API_KEY` for production OTP email delivery
+   - `RESEND_FROM_EMAIL` using a verified sender/domain in Resend
    - `DEFAULT_FROM_EMAIL`
    - `FAST2SMS_API_KEY` if you use it
    - `CLOUDINARY_URL` for persistent admin-uploaded vehicle images
@@ -37,6 +37,7 @@ This project is a Django app in `backend/` and is now set up for Render.
 
 - Do not use SQLite on Render. Attach the provided PostgreSQL database.
 - `backend/.env.example` now contains placeholders only. Put real secrets in Render environment variables, not in git.
+- OTP email delivery is now designed to use Resend first. SMTP settings remain as a fallback for local or legacy setups.
 - Admin-uploaded vehicle images are now designed to use Cloudinary when `CLOUDINARY_URL` or the Cloudinary credential variables are set.
 - Existing vehicle records that currently point to missing local files need one re-upload in the admin panel so their `photo_url` is updated to the Cloudinary URL.
 - Other uploaded files still use local media unless you extend Cloudinary usage to those fields too.

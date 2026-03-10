@@ -336,6 +336,42 @@ def _normalize_indian_phone(raw_phone):
 
 def _send_email_otp(target, code):
     allow_dev_fallback = bool(getattr(settings, "OTP_DEV_FALLBACK", False))
+    resend_api_key = (getattr(settings, "RESEND_API_KEY", "") or "").strip()
+    resend_from_email = (getattr(settings, "RESEND_FROM_EMAIL", "") or "").strip()
+
+    if resend_api_key and resend_from_email:
+        api_url = "https://api.resend.com/emails"
+        payload = json.dumps(
+            {
+                "from": resend_from_email,
+                "to": [target],
+                "subject": "RoyalWheels OTP Verification",
+                "text": f"Your OTP is {code}. It is valid for 5 minutes.",
+            }
+        ).encode("utf-8")
+        request_obj = urllib.request.Request(api_url, data=payload, method="POST")
+        request_obj.add_header("Authorization", f"Bearer {resend_api_key}")
+        request_obj.add_header("Content-Type", "application/json")
+        try:
+            with urllib.request.urlopen(request_obj, timeout=20) as response:
+                response.read()
+            return True, "OTP sent to email."
+        except urllib.error.HTTPError as exc:
+            try:
+                error_body = exc.read().decode("utf-8", errors="ignore")
+            except Exception:
+                error_body = str(exc)
+            logger.exception("Resend OTP delivery failed for target=%s", target)
+            if allow_dev_fallback:
+                print(f"[DEV EMAIL OTP FALLBACK] {target}: {code} (resend http error: {error_body})")
+                return True, "OTP generated successfully."
+            return False, "Email delivery failed. Check RESEND_API_KEY and RESEND_FROM_EMAIL."
+        except Exception as exc:
+            logger.exception("Resend OTP delivery failed for target=%s", target)
+            if allow_dev_fallback:
+                print(f"[DEV EMAIL OTP FALLBACK] {target}: {code} (resend send failed: {exc})")
+                return True, "OTP generated successfully."
+            return False, "Email delivery failed. Please try again later."
 
     if "console" in str(getattr(settings, "EMAIL_BACKEND", "")).lower():
         if allow_dev_fallback:
