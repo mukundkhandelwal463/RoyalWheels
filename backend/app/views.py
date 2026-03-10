@@ -110,6 +110,38 @@ def _find_customer_profile_for_booking(booking):
     return profile
 
 
+def _clone_uploaded_file(uploaded_file):
+    if not uploaded_file:
+        return None
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+    content = uploaded_file.read()
+    try:
+        uploaded_file.seek(0)
+    except Exception:
+        pass
+    return ContentFile(content, name=getattr(uploaded_file, "name", "upload.bin"))
+
+
+def _apply_vehicle_primary_image(vehicle, request_files):
+    primary_upload = request_files.get("photo")
+    gallery_uploads = list(request_files.getlist("gallery_images"))
+
+    if primary_upload:
+        vehicle.photo = primary_upload
+        vehicle.photo_url = ""
+        return gallery_uploads
+
+    if gallery_uploads:
+        cloned_primary = _clone_uploaded_file(gallery_uploads[-1])
+        if cloned_primary is not None:
+            vehicle.photo = cloned_primary
+            vehicle.photo_url = ""
+    return gallery_uploads
+
+
 OTP_EXPIRY_SECONDS = 300
 
 
@@ -684,8 +716,9 @@ def vehicle_manage(request):
     if request.method == "POST" and form.is_valid():
         vehicle = form.save(commit=False)
         vehicle.owner = owner
+        gallery_uploads = _apply_vehicle_primary_image(vehicle, request.FILES)
         vehicle.save()
-        for uploaded in request.FILES.getlist("gallery_images"):
+        for uploaded in gallery_uploads:
             VehicleImage.objects.create(vehicle=vehicle, image=uploaded)
         messages.success(request, "Vehicle added successfully.")
         return redirect("vehicle_manage")
@@ -710,8 +743,11 @@ def vehicle_edit(request, vehicle_id):
     vehicle = get_object_or_404(Vehicle.objects.prefetch_related("images"), id=vehicle_id, owner=owner)
     form = VehicleForm(request.POST or None, request.FILES or None, instance=vehicle)
     if request.method == "POST" and form.is_valid():
-        form.save()
-        for uploaded in request.FILES.getlist("gallery_images"):
+        vehicle = form.save(commit=False)
+        gallery_uploads = _apply_vehicle_primary_image(vehicle, request.FILES)
+        vehicle.save()
+        form.save_m2m()
+        for uploaded in gallery_uploads:
             VehicleImage.objects.create(vehicle=vehicle, image=uploaded)
         messages.success(request, "Vehicle updated successfully.")
         return redirect("vehicle_manage")
