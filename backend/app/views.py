@@ -25,6 +25,7 @@ from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.db import connection
 from django.db.models import Count, Q
+from django.db.models.deletion import ProtectedError
 from django.db.utils import OperationalError
 from django.templatetags.static import static
 from django.http import FileResponse, Http404, HttpResponseBadRequest, JsonResponse
@@ -778,6 +779,15 @@ def owner_profile_manage(request):
     if request.method == "POST" and form.is_valid():
         profile = form.save(commit=False)
         profile.user = request.user
+        profile_upload = request.FILES.get("profile_photo")
+        if profile_upload:
+            cloudinary_url = _upload_image_to_cloudinary(
+                profile_upload,
+                f"{getattr(settings, 'CLOUDINARY_FOLDER', 'royalwheels')}/owner_profiles",
+            )
+            if cloudinary_url:
+                profile.profile_photo = None
+                profile.profile_photo_url = cloudinary_url
         profile.save()
         messages.success(request, "Profile saved successfully.")
         return redirect("owner_profile_manage")
@@ -854,8 +864,15 @@ def vehicle_delete(request, vehicle_id):
         return redirect("owner_profile_manage")
 
     vehicle = get_object_or_404(Vehicle, id=vehicle_id, owner=owner)
-    vehicle.delete()
-    messages.success(request, "Vehicle deleted.")
+    try:
+        vehicle.delete()
+    except ProtectedError:
+        messages.error(
+            request,
+            "This vehicle cannot be deleted because it is linked to existing bookings. Complete or remove those bookings first.",
+        )
+    else:
+        messages.success(request, "Vehicle deleted.")
     return redirect("vehicle_manage")
 
 
