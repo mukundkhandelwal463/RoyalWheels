@@ -134,7 +134,9 @@ class Booking(TimestampedModel):
     customer_license_number = models.CharField(max_length=60, blank=True)
     customer_age = models.PositiveSmallIntegerField(blank=True, null=True)
     driving_license_doc = models.FileField(upload_to="booking_docs/licenses/", blank=True, null=True)
+    driving_license_doc_url = models.URLField(blank=True)
     student_id_doc = models.FileField(upload_to="booking_docs/student_ids/", blank=True, null=True)
+    student_id_doc_url = models.URLField(blank=True)
     owner = models.ForeignKey(
         OwnerProfile,
         on_delete=models.CASCADE,
@@ -249,11 +251,13 @@ class CustomerProfile(TimestampedModel):
         blank=True,
         null=True,
     )
+    driving_license_doc_url = models.URLField(blank=True)
     student_id_doc = models.FileField(
         upload_to="customer_docs/student_ids/",
         blank=True,
         null=True,
     )
+    student_id_doc_url = models.URLField(blank=True)
 
     class Meta:
         ordering = ["-created_at"]

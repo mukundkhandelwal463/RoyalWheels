@@ -48,12 +48,12 @@
                                     <span class="doc-meta">LPU ID: {{ booking.customer_lpu_id }}</span>
                                 {% endif %}
                                 <div class="doc-links">
-                                    {% if booking.driving_license_doc %}
+                                    {% if booking.driving_license_doc or booking.driving_license_doc_url %}
                                         <a href="{% url 'booking_document_download' booking.id 'license' %}">Driving License</a>
                                     {% else %}
                                         <span class="doc-missing">Driving License: Not uploaded</span>
                                     {% endif %}
-                                    {% if booking.student_id_doc %}
+                                    {% if booking.student_id_doc or booking.student_id_doc_url %}
                                         <a href="{% url 'booking_document_download' booking.id 'student-id' %}">College ID Card</a>
                                     {% else %}
                                         <span class="doc-missing">College ID Card: Not uploaded</span>

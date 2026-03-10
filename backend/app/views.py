@@ -166,6 +166,36 @@ def _upload_image_to_cloudinary(uploaded_file, folder):
             pass
 
 
+def _upload_data_url_to_cloudinary(data_url, folder, prefix):
+    if not data_url or not getattr(settings, "CLOUDINARY_ENABLED", False):
+        return None
+    try:
+        result = cloudinary.uploader.upload(
+            data_url,
+            folder=folder,
+            resource_type="auto",
+            public_id=f"{prefix}_{uuid.uuid4().hex[:12]}",
+            overwrite=False,
+            unique_filename=False,
+        )
+        return str(result.get("secure_url") or "").strip() or None
+    except Exception as exc:
+        logger.warning("Cloudinary data-url upload failed for %s: %s", prefix, exc)
+        return None
+
+
+def _document_url(field_file, url_value):
+    if url_value:
+        return str(url_value).strip()
+    if field_file and getattr(field_file, "name", ""):
+        try:
+            if field_file.storage.exists(field_file.name):
+                return field_file.url
+        except Exception:
+            return ""
+    return ""
+
+
 def _apply_vehicle_primary_image(vehicle, request_files):
     primary_upload = request_files.get("photo")
     gallery_uploads = list(request_files.getlist("gallery_images"))
@@ -868,6 +898,8 @@ def booking_document_download(request, booking_id, document_type):
     booking = get_object_or_404(Booking.objects.select_related("vehicle", "owner"), id=booking_id, owner=owner)
 
     if document_type == "license":
+        if booking.driving_license_doc_url:
+            return redirect(booking.driving_license_doc_url)
         response = _existing_file_response(
             booking.driving_license_doc,
             filename=f"{booking.customer_name or 'customer'}-driving-license",
@@ -875,6 +907,8 @@ def booking_document_download(request, booking_id, document_type):
         if response:
             return response
         profile = _find_customer_profile_for_booking(booking)
+        if profile and profile.driving_license_doc_url:
+            return redirect(profile.driving_license_doc_url)
         response = _existing_file_response(
             profile.driving_license_doc if profile else None,
             filename=f"{booking.customer_name or 'customer'}-driving-license",
@@ -882,6 +916,8 @@ def booking_document_download(request, booking_id, document_type):
         if response:
             return response
     elif document_type == "student-id":
+        if booking.student_id_doc_url:
+            return redirect(booking.student_id_doc_url)
         response = _existing_file_response(
             booking.student_id_doc,
             filename=f"{booking.customer_name or 'customer'}-college-id",
@@ -889,6 +925,8 @@ def booking_document_download(request, booking_id, document_type):
         if response:
             return response
         profile = _find_customer_profile_for_booking(booking)
+        if profile and profile.student_id_doc_url:
+            return redirect(profile.student_id_doc_url)
         response = _existing_file_response(
             profile.student_id_doc if profile else None,
             filename=f"{booking.customer_name or 'customer'}-college-id",
@@ -1008,8 +1046,8 @@ def booking_list(request):
             "customer_lpu_id": booking.customer_lpu_id,
             "customer_license_number": booking.customer_license_number,
             "customer_age": booking.customer_age,
-            "driving_license_doc": booking.driving_license_doc.url if booking.driving_license_doc else "",
-            "student_id_doc": booking.student_id_doc.url if booking.student_id_doc else "",
+            "driving_license_doc": _document_url(booking.driving_license_doc, booking.driving_license_doc_url),
+            "student_id_doc": _document_url(booking.student_id_doc, booking.student_id_doc_url),
             "vehicle_id": booking.vehicle_id,
             "vehicle_category": booking.vehicle.category,
             "vehicle_is_available": booking.vehicle.is_available,
@@ -1224,17 +1262,35 @@ def customer_profile_upsert(request):
     driving_license_raw = payload.get("driving_license_doc") or payload.get("drivingLicenseDoc")
     student_id_raw = payload.get("student_id_doc") or payload.get("studentIdDoc")
 
+    driving_license_doc_url = _upload_data_url_to_cloudinary(
+        driving_license_raw,
+        f"{getattr(settings, 'CLOUDINARY_FOLDER', 'royalwheels')}/customer_docs/licenses",
+        "customer_license",
+    )
     driving_license_doc = _decode_data_url_file(driving_license_raw, "customer_license")
     if driving_license_doc is None:
         driving_license_doc = None
-    if driving_license_doc is not None:
+    if driving_license_doc_url:
+        profile.driving_license_doc = None
+        profile.driving_license_doc_url = driving_license_doc_url
+    elif driving_license_doc is not None:
         profile.driving_license_doc = driving_license_doc
+        profile.driving_license_doc_url = ""
 
+    student_id_doc_url = _upload_data_url_to_cloudinary(
+        student_id_raw,
+        f"{getattr(settings, 'CLOUDINARY_FOLDER', 'royalwheels')}/customer_docs/student_ids",
+        "customer_student_id",
+    )
     student_id_doc = _decode_data_url_file(student_id_raw, "customer_student_id")
     if student_id_doc is None:
         student_id_doc = None
-    if student_id_doc is not None:
+    if student_id_doc_url:
+        profile.student_id_doc = None
+        profile.student_id_doc_url = student_id_doc_url
+    elif student_id_doc is not None:
         profile.student_id_doc = student_id_doc
+        profile.student_id_doc_url = ""
 
     try:
         profile.save()
@@ -1246,8 +1302,8 @@ def customer_profile_upsert(request):
             "saved": True,
             "email": profile.email,
             "lpu_id": profile.lpu_id or "",
-            "driving_license_doc": profile.driving_license_doc.url if profile.driving_license_doc else "",
-            "student_id_doc": profile.student_id_doc.url if profile.student_id_doc else "",
+            "driving_license_doc": _document_url(profile.driving_license_doc, profile.driving_license_doc_url),
+            "student_id_doc": _document_url(profile.student_id_doc, profile.student_id_doc_url),
         }
     )
 
@@ -1560,11 +1616,25 @@ def create_booking(request):
     start_time = payload.get("start_time")
     end_time = payload.get("end_time")
     total_price = _parse_money(payload.get("total_price"))
-    driving_license_doc = _decode_data_url_file(payload.get("driving_license_doc"), "license")
-    student_id_doc = _decode_data_url_file(payload.get("student_id_doc"), "student_id")
+    driving_license_raw = payload.get("driving_license_doc")
+    student_id_raw = payload.get("student_id_doc")
+
+    driving_license_doc_url = _upload_data_url_to_cloudinary(
+        driving_license_raw,
+        f"{getattr(settings, 'CLOUDINARY_FOLDER', 'royalwheels')}/booking_docs/licenses",
+        "license",
+    )
+    student_id_doc_url = _upload_data_url_to_cloudinary(
+        student_id_raw,
+        f"{getattr(settings, 'CLOUDINARY_FOLDER', 'royalwheels')}/booking_docs/student_ids",
+        "student_id",
+    )
+
+    driving_license_doc = _decode_data_url_file(driving_license_raw, "license")
+    student_id_doc = _decode_data_url_file(student_id_raw, "student_id")
 
     # If user previously uploaded docs in DB, allow booking without sending base64 docs again.
-    if driving_license_doc is None or student_id_doc is None:
+    if (driving_license_doc is None and not driving_license_doc_url) or (student_id_doc is None and not student_id_doc_url):
         profile = None
         lookup_email = (customer_email or "").strip().lower()
         lookup_lpu = (customer_lpu_id or "").strip().lower()
@@ -1575,6 +1645,8 @@ def create_booking(request):
         if profile:
             driving_license_doc = driving_license_doc or profile.driving_license_doc
             student_id_doc = student_id_doc or profile.student_id_doc
+            driving_license_doc_url = driving_license_doc_url or profile.driving_license_doc_url
+            student_id_doc_url = student_id_doc_url or profile.student_id_doc_url
 
     if isinstance(customer_age, str):
         customer_age = customer_age.strip()
@@ -1599,8 +1671,8 @@ def create_booking(request):
         or customer_age is None
         or not start_date
         or not end_date
-        or driving_license_doc is None
-        or student_id_doc is None
+        or (driving_license_doc is None and not driving_license_doc_url)
+        or (student_id_doc is None and not student_id_doc_url)
     ):
         return HttpResponseBadRequest("Complete profile and both documents are required before booking.")
 
@@ -1684,7 +1756,9 @@ def create_booking(request):
             payment_method=payment_method,
             status=Booking.Status.PENDING,
             driving_license_doc=driving_license_doc,
+            driving_license_doc_url=driving_license_doc_url or "",
             student_id_doc=student_id_doc,
+            student_id_doc_url=student_id_doc_url or "",
         )
     except OperationalError:
         return HttpResponseBadRequest(

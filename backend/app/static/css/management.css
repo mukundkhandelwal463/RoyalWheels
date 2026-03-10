@@ -505,8 +505,11 @@ td {
 }
 
 .action-form {
-    display: flex;
-    gap: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    white-space: nowrap;
 }
 
 .accept-btn,
