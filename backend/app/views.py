@@ -57,11 +57,21 @@ def _partners_queryset():
 
 
 def _vehicle_image_url(vehicle):
+    if vehicle.photo and getattr(vehicle.photo, "name", ""):
+        try:
+            if vehicle.photo.storage.exists(vehicle.photo.name):
+                return vehicle.photo.url
+        except Exception:
+            pass
+
     first_gallery_image = vehicle.images.first()
-    if first_gallery_image:
-        return first_gallery_image.image.url
-    if vehicle.photo:
-        return vehicle.photo.url
+    if first_gallery_image and getattr(first_gallery_image.image, "name", ""):
+        try:
+            if first_gallery_image.image.storage.exists(first_gallery_image.image.name):
+                return first_gallery_image.image.url
+        except Exception:
+            pass
+
     if vehicle.photo_url:
         return vehicle.photo_url
 
@@ -658,6 +668,8 @@ def vehicle_manage(request):
         return redirect("vehicle_manage")
 
     vehicles = owner.vehicles.prefetch_related("images").all()
+    for vehicle in vehicles:
+        vehicle.display_image_url = _vehicle_image_url(vehicle)
     return render(
         request,
         "management/vehicle_manage.html",
@@ -680,6 +692,8 @@ def vehicle_edit(request, vehicle_id):
             VehicleImage.objects.create(vehicle=vehicle, image=uploaded)
         messages.success(request, "Vehicle updated successfully.")
         return redirect("vehicle_manage")
+
+    vehicle.display_image_url = _vehicle_image_url(vehicle)
 
     return render(
         request,

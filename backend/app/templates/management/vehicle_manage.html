@@ -57,12 +57,8 @@
                 {% for vehicle in vehicles %}
                     <tr>
                         <td>
-                            {% if vehicle.photo %}
-                                <img src="{{ vehicle.photo.url }}" alt="{{ vehicle.name }}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;">
-                            {% elif vehicle.images.first %}
-                                <img src="{{ vehicle.images.first.image.url }}" alt="{{ vehicle.name }}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;">
-                            {% elif vehicle.photo_url %}
-                                <img src="{{ vehicle.photo_url }}" alt="{{ vehicle.name }}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;">
+                            {% if vehicle.display_image_url %}
+                                <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.name }}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;" onerror="this.onerror=null;this.style.display='none';this.parentElement.innerHTML='-';">
                             {% else %}
                                 -
                             {% endif %}

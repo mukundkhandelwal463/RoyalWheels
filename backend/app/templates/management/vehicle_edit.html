@@ -15,6 +15,11 @@
     <div class="panel-head">
         <h2>Vehicle Details</h2>
     </div>
+    {% if vehicle.display_image_url %}
+    <div style="margin-bottom:16px;">
+        <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.name }}" style="width:140px;height:100px;object-fit:cover;border-radius:10px;border:1px solid #d6dce8;" onerror="this.style.display='none';">
+    </div>
+    {% endif %}
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
