@@ -82,7 +82,7 @@
         <div class="cars-row search-grid">
           {% for vehicle in cars %}
             <div class="car-card search-card" data-vehicle-id="{{ vehicle.id }}" data-type="Car">
-              <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.brand }} {{ vehicle.name }}" class="car-img" />
+              <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.brand }} {{ vehicle.name }}" class="car-img" onerror="this.onerror=null;this.src='{% if vehicle.category == 'bike' %}{% static 'assets/hunter.png' %}{% else %}{% static 'assets/BMW.png' %}{% endif %}';" />
               <div class="car-info">
                 <h1 class="car-name">{{ vehicle.brand }} {{ vehicle.name }}</h1>
                 <p class="car-subtitle">Car - {{ vehicle.model_year }}</p>
@@ -111,7 +111,7 @@
         <div class="cars-row search-grid">
           {% for vehicle in bikes %}
             <div class="car-card search-card" data-vehicle-id="{{ vehicle.id }}" data-type="Bike">
-              <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.brand }} {{ vehicle.name }}" class="car-img" />
+              <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.brand }} {{ vehicle.name }}" class="car-img" onerror="this.onerror=null;this.src='{% if vehicle.category == 'bike' %}{% static 'assets/hunter.png' %}{% else %}{% static 'assets/BMW.png' %}{% endif %}';" />
               <div class="car-info">
                 <h1 class="car-name">{{ vehicle.brand }} {{ vehicle.name }}</h1>
                 <p class="car-subtitle">Bike - {{ vehicle.model_year }}</p>
