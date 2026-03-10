@@ -35,10 +35,8 @@
     <section class="admin-shell">
         <aside class="sidebar">
             <a class="photo-wrap" href="{% url 'owner_profile_manage' %}" title="Change profile photo">
-                {% if owner and owner.profile_photo %}
-                    <img id="sidebarProfilePhoto" class="admin-photo" src="{{ owner.profile_photo.url }}" alt="Admin Photo">
-                {% elif owner and owner.profile_photo_url %}
-                    <img id="sidebarProfilePhoto" class="admin-photo" src="{{ owner.profile_photo_url }}" alt="Admin Photo">
+                {% if owner and owner.display_profile_photo_url %}
+                    <img id="sidebarProfilePhoto" class="admin-photo" src="{{ owner.display_profile_photo_url }}" alt="Admin Photo">
                 {% else %}
                     <div id="sidebarProfilePhoto" class="admin-photo admin-fallback">RW</div>
                 {% endif %}

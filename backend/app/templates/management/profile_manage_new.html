@@ -21,7 +21,7 @@
             <div class="photo-editor">
                 <img
                     id="profilePhotoPreview"
-                    src="{% if owner and owner.profile_photo %}{{ owner.profile_photo.url }}{% elif owner and owner.profile_photo_url %}{{ owner.profile_photo_url }}{% else %}https://via.placeholder.com/120x120.png?text=Photo{% endif %}"
+                    src="{% if owner and owner.display_profile_photo_url %}{{ owner.display_profile_photo_url }}{% else %}https://via.placeholder.com/120x120.png?text=Photo{% endif %}"
                     alt="Profile Preview"
                 >
                 <div>

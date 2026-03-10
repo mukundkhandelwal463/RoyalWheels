@@ -90,6 +90,49 @@ def _vehicle_image_url(vehicle):
     return _vehicle_fallback_image_url(vehicle)
 
 
+def _owner_profile_image_url(owner):
+    if not owner:
+        return ""
+
+    if owner.profile_photo and getattr(owner.profile_photo, "name", ""):
+        try:
+            if owner.profile_photo.storage.exists(owner.profile_photo.name):
+                return owner.profile_photo.url
+        except Exception:
+            pass
+
+    if owner.profile_photo_url:
+        candidate = str(owner.profile_photo_url).strip()
+        parsed = urllib.parse.urlparse(candidate)
+        media_url = getattr(settings, "MEDIA_URL", "/media/")
+        if parsed.path and media_url and parsed.path.startswith(media_url):
+            relative_media_path = parsed.path[len(media_url):].lstrip("/")
+            absolute_media_path = Path(getattr(settings, "MEDIA_ROOT", "")) / relative_media_path
+            if absolute_media_path.exists():
+                return candidate
+        elif candidate:
+            return candidate
+
+    return static("assets/logo.jpg")
+
+
+def _prepare_owner_profile(owner):
+    if not owner:
+        return owner
+
+    if owner.profile_photo and getattr(owner.profile_photo, "name", ""):
+        try:
+            photo_exists = owner.profile_photo.storage.exists(owner.profile_photo.name)
+        except Exception:
+            photo_exists = False
+        if not photo_exists and owner.profile_photo_url:
+            owner.profile_photo = None
+            owner.save(update_fields=["profile_photo", "updated_at"])
+
+    owner.display_profile_photo_url = _owner_profile_image_url(owner)
+    return owner
+
+
 def _vehicle_fallback_image_url(vehicle):
     label = f"{vehicle.brand} {vehicle.name}".lower()
 
@@ -677,7 +720,7 @@ def owner_dashboard_api(request):
 
 @login_required
 def owner_dashboard(request):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     legacy_booking_schema = False
     deferred_legacy_fields = (
         "customer_email",
@@ -774,7 +817,7 @@ def booking_decision(request, booking_id):
 
 @login_required
 def owner_profile_manage(request):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     form = OwnerProfileForm(request.POST or None, request.FILES or None, instance=owner)
     if request.method == "POST" and form.is_valid():
         profile = form.save(commit=False)
@@ -791,6 +834,7 @@ def owner_profile_manage(request):
         profile.save()
         messages.success(request, "Profile saved successfully.")
         return redirect("owner_profile_manage")
+    owner = _prepare_owner_profile(owner)
     return render(
         request,
         "management/profile_manage.html",
@@ -800,7 +844,7 @@ def owner_profile_manage(request):
 
 @login_required
 def vehicle_manage(request):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     if not owner:
         messages.error(request, "Create your owner profile first.")
         return redirect("owner_profile_manage")
@@ -828,7 +872,7 @@ def vehicle_manage(request):
 
 @login_required
 def vehicle_edit(request, vehicle_id):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     if not owner:
         messages.error(request, "Create your owner profile first.")
         return redirect("owner_profile_manage")
@@ -858,7 +902,7 @@ def vehicle_edit(request, vehicle_id):
 @login_required
 @require_POST
 def vehicle_delete(request, vehicle_id):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     if not owner:
         messages.error(request, "Create your owner profile first.")
         return redirect("owner_profile_manage")
@@ -879,7 +923,7 @@ def vehicle_delete(request, vehicle_id):
 @login_required
 @require_POST
 def vehicle_image_delete(request, image_id):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     if not owner:
         messages.error(request, "Create your owner profile first.")
         return redirect("owner_profile_manage")
@@ -893,7 +937,7 @@ def vehicle_image_delete(request, image_id):
 
 @login_required
 def booking_manage(request):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     if not owner:
         messages.error(request, "Create your owner profile first.")
         return redirect("owner_profile_manage")
@@ -907,7 +951,7 @@ def booking_manage(request):
 
 @login_required
 def booking_document_download(request, booking_id, document_type):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     if not owner:
         messages.error(request, "Create your owner profile first.")
         return redirect("owner_profile_manage")
@@ -958,7 +1002,7 @@ def booking_document_download(request, booking_id, document_type):
 
 @login_required
 def expense_manage(request):
-    owner = OwnerProfile.objects.filter(user=request.user).first()
+    owner = _prepare_owner_profile(OwnerProfile.objects.filter(user=request.user).first())
     if not owner:
         messages.error(request, "Create your owner profile first.")
         return redirect("owner_profile_manage")
