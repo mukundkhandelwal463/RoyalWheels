@@ -12,9 +12,6 @@ const otpState = {
   customerProfileUpdate: {
     email: { otpId: "", target: "", verified: false }
   },
-  customerProfileDocs: {
-    email: { otpId: "", target: "", verified: false }
-  },
   customerProfilePassword: {
     email: { otpId: "", target: "", verified: false }
   }
