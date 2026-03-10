@@ -14,6 +14,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
+import cloudinary.uploader
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
@@ -125,20 +126,58 @@ def _clone_uploaded_file(uploaded_file):
     return ContentFile(content, name=getattr(uploaded_file, "name", "upload.bin"))
 
 
+def _upload_image_to_cloudinary(uploaded_file, folder):
+    if not uploaded_file or not getattr(settings, "CLOUDINARY_ENABLED", False):
+        return None
+    try:
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+        result = cloudinary.uploader.upload(
+            uploaded_file,
+            folder=folder,
+            resource_type="image",
+            overwrite=False,
+            use_filename=True,
+            unique_filename=True,
+        )
+        return str(result.get("secure_url") or "").strip() or None
+    except Exception as exc:
+        logger.warning("Cloudinary upload failed for %s: %s", getattr(uploaded_file, "name", "upload"), exc)
+        return None
+    finally:
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+
+
 def _apply_vehicle_primary_image(vehicle, request_files):
     primary_upload = request_files.get("photo")
     gallery_uploads = list(request_files.getlist("gallery_images"))
+    upload_folder = f"{getattr(settings, 'CLOUDINARY_FOLDER', 'royalwheels')}/vehicles"
 
     if primary_upload:
-        vehicle.photo = primary_upload
-        vehicle.photo_url = ""
+        cloudinary_url = _upload_image_to_cloudinary(primary_upload, upload_folder)
+        if cloudinary_url:
+            vehicle.photo = None
+            vehicle.photo_url = cloudinary_url
+        else:
+            vehicle.photo = primary_upload
+            vehicle.photo_url = ""
         return gallery_uploads
 
     if gallery_uploads:
-        cloned_primary = _clone_uploaded_file(gallery_uploads[-1])
-        if cloned_primary is not None:
-            vehicle.photo = cloned_primary
-            vehicle.photo_url = ""
+        cloudinary_url = _upload_image_to_cloudinary(gallery_uploads[-1], upload_folder)
+        if cloudinary_url:
+            vehicle.photo = None
+            vehicle.photo_url = cloudinary_url
+        else:
+            cloned_primary = _clone_uploaded_file(gallery_uploads[-1])
+            if cloned_primary is not None:
+                vehicle.photo = cloned_primary
+                vehicle.photo_url = ""
     return gallery_uploads
 
 
