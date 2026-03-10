@@ -1,0 +1,216 @@
+:root {
+  --rw-bg: #eef2ff;
+  --rw-surface: #ffffff;
+  --rw-surface-soft: #f3f7ff;
+  --rw-text: #0b132b;
+  --rw-muted: #4e5b73;
+  --rw-brand: #0f766e;
+  --rw-brand-2: #0e7490;
+  --rw-accent: #b58825;
+  --rw-border: #d7e0ef;
+  --rw-shadow-sm: 0 10px 24px rgba(11, 19, 43, 0.1);
+  --rw-shadow-lg: 0 26px 64px rgba(11, 19, 43, 0.18);
+  --rw-radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--rw-text);
+  background:
+    radial-gradient(circle at 92% 8%, rgba(15, 118, 110, 0.16), transparent 34%),
+    radial-gradient(circle at 8% 20%, rgba(181, 136, 37, 0.12), transparent 32%),
+    var(--rw-bg);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Sora", "Manrope", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+}
+
+main {
+  width: min(1220px, 100%);
+  margin: 0 auto;
+}
+
+input,
+select,
+textarea {
+  border-radius: 12px;
+  border: 1px solid var(--rw-border);
+  background: #ffffff;
+  color: var(--rw-text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--rw-brand);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2);
+}
+
+button {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.page-header,
+.page-title,
+.my-bookings,
+.profile-page,
+.container,
+.payment-container {
+  border-radius: 22px;
+}
+
+.page-header,
+.page-title {
+  margin-top: 110px;
+}
+
+.sort-bar,
+.booking-header {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--rw-border);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--rw-shadow-sm);
+}
+
+.cars-row,
+.partners-detailed,
+.testimonial-cards,
+.cards,
+.profile-wrapper,
+.payment-container,
+.auth-container,
+.booking-box,
+.vehicle-details,
+.profile-card,
+.partner-row,
+.car-card {
+  animation: rw-fade-up 0.45s ease;
+}
+
+.car-card,
+.partner-row,
+.profile-card,
+.booking-box,
+.vehicle-details,
+.booking-card,
+.booking-item,
+.booking-summary,
+.payment-method {
+  background: linear-gradient(180deg, #ffffff, var(--rw-surface-soft));
+  border: 1px solid var(--rw-border);
+  border-radius: var(--rw-radius);
+  box-shadow: var(--rw-shadow-sm);
+}
+
+.car-card:hover,
+.partner-row:hover,
+.profile-card:hover,
+.booking-item:hover {
+  box-shadow: var(--rw-shadow-lg);
+}
+
+.car-img,
+.vehicle-image,
+#vehicleImage,
+.profile-image,
+.partner-logo,
+.provider-img,
+.testimonial-header img {
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.auth-container,
+.payment-container {
+  width: min(520px, calc(100% - 32px));
+  margin: 56px auto;
+  padding: 26px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--rw-border);
+  box-shadow: var(--rw-shadow-lg);
+  backdrop-filter: blur(10px);
+}
+
+.auth-container h2,
+.payment-container .head {
+  margin-top: 0;
+  color: var(--rw-text);
+}
+
+.auth-container input,
+.payment-container input,
+.payment-method label {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.auth-container button,
+.payment-method button,
+.book-btn,
+.save-btn,
+.logout-btn {
+  background: linear-gradient(135deg, var(--rw-brand), var(--rw-brand-2));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.footer {
+  margin-top: 26px;
+}
+
+.logo-wheels,
+.gold-text,
+span.logo-wheels {
+  color: var(--rw-accent);
+}
+
+@keyframes rw-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 860px) {
+  .page-header,
+  .page-title {
+    margin-top: 124px;
+  }
+
+  .auth-container,
+  .payment-container {
+    margin-top: 22px;
+  }
+}

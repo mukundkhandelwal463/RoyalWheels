@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available Bikes | RoyalWheels</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/Bike_style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+</head>
+<body>
+  <nav class="navbar">
+    <section class="hero-image">
+      <a href="/Home_index.html" style="text-decoration: none; color: inherit;">
+        <img src="{% static 'assets/logo.jpg' %}" alt="RoyalWheels Bike">
+      </a>
+    </section>
+    <div class="logo">
+      <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="/Home_index.html" style="text-decoration: none; color: inherit;">Home</a></li>
+      <li><a href="/Bikes.html" style="text-decoration: none; color: inherit;">Bikes</a></li>
+      <li><a href="/Car.html" style="text-decoration: none; color: inherit;">Cars</a></li>
+      <li><a href="/MyBooking.html" style="text-decoration: none; color: inherit;">My Bookings</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div class="search-wrapper">
+        <input type="text" placeholder="Search vehicles" />
+      </div>
+      <button class="btn-outline" onclick="window.location.href='/admin-login/'">Admin</button>
+      <button class="btn-primary" onclick="window.location.href='/login.html'">Login</button>
+    </div>
+  </nav>
+
+  <div class="site-content">
+    <section class="page-header">
+      <h1>Available <span class="logo-wheels">Bikes</span></h1>
+      <p>Two-wheelers listed by verified shopkeepers.</p>
+    </section>
+
+    <section class="filter-toolbar" aria-label="Bike filters">
+      <div class="search-bar">
+        <span class="search-bar-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <input type="text" id="bikeSearch" placeholder="Search bikes by brand, model, name..." autocomplete="off" />
+      </div>
+      <div class="sort-bar">
+        <label for="bikeSort">Sort</label>
+        <select id="bikeSort" aria-label="Sort bikes">
+          <option value="">Sort by</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="name">Name: A to Z</option>
+          <option value="name-desc">Name: Z to A</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="cars-row" id="bikesContainer">
+      {% for vehicle in vehicles %}
+        <div class="car-card" data-vehicle-id="{{ vehicle.id }}" data-brand="{{ vehicle.brand|lower }}" data-name="{{ vehicle.name|lower }}" data-owner="{{ vehicle.owner.business_name|lower }}" data-price="{{ vehicle.rent_per_day }}">
+          <img src="{{ vehicle.display_image_url }}" alt="{{ vehicle.brand }} {{ vehicle.name }}" class="car-img" />
+          {% if vehicle.gallery_urls|length > 1 %}
+            <div style="display:flex;gap:6px;justify-content:center;margin-top:6px;flex-wrap:wrap;">
+              {% for image_url in vehicle.gallery_urls|slice:"1:4" %}
+                <img src="{{ image_url }}" alt="{{ vehicle.name }} image" style="width:44px;height:34px;object-fit:cover;border-radius:6px;border:1px solid #d6dce8;">
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="car-info">
+            <h1 class="car-name">{{ vehicle.brand }} {{ vehicle.name }}</h1>
+            <p class="car-subtitle">Bike - {{ vehicle.model_year }}</p>
+          </div>
+          <div class="car-specs">
+            <div class="spec">{{ vehicle.seats }} Seats</div>
+            <div class="spec">{{ vehicle.get_fuel_type_display }}</div>
+            <div class="spec">{{ vehicle.transmission|default:"Manual" }}</div>
+            <div class="spec">{{ vehicle.owner.business_name }}</div>
+            <div class="spec">{{ vehicle.registration_number }}</div>
+            <div class="spec">{% if vehicle.is_available %}Available{% else %}Booked{% endif %}</div>
+          </div>
+          <div class="car-price">Rs {{ vehicle.rent_per_day }} <span>/ day</span></div>
+          <button class="book-btn">Book Now</button>
+        </div>
+      {% empty %}
+        <p>No bikes listed yet.</p>
+      {% endfor %}
+    </section>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+        </div>
+        <p>Premium car and bike rental service.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 RoyalWheels. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/navbar.js' %}"></script>
+  <script src="{% static 'js/bike.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signup | RoyalWheels</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body class="login-page">
+<main class="login-shell">
+  <div class="auth-container">
+    <h2>Create Account</h2>
+
+    <form id="signupForm" onsubmit="event.preventDefault(); signup();">
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <div class="otp-row">
+        <input type="text" id="emailOtp" placeholder="Email OTP">
+        <button type="button" id="sendEmailOtpBtn" class="otp-btn">Send Email OTP</button>
+        <button type="button" id="verifyEmailOtpBtn" class="otp-btn">Verify</button>
+      </div>
+
+      <input type="tel" id="phone" placeholder="Phone Number (Optional)">
+      <input type="number" id="age" placeholder="Age" min="18" max="100">
+
+      <input type="text" id="address" placeholder="Address">
+      <input type="text" id="license" placeholder="Driving License Number">
+      <input type="text" id="lpuId" placeholder="LPU Registration Number">
+
+      <input type="password" id="password" placeholder="Create Password" required minlength="6">
+
+      <button type="submit">Signup</button>
+    </form>
+
+    <p class="switch">
+      Already have an account? <a href="login.html">Login</a>
+    </p>
+  </div>
+</main>
+
+<script src="{% static 'js/auth.js' %}?v=20260307a"></script>
+
+</footer>
+</body>
+</html>

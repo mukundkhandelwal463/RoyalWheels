@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <!-- GOOGLE FONT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Bookings | RoyalWheels</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'css/home_style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/mybooking.css' %}?v=20260306a" />
+  <link rel="stylesheet" href="{% static 'css/navbar.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+  <!-- <link rel="stylesheet" href="{% static 'css/navbar.css' %}" /> -->
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+      <section class="hero-image">
+          <a href="Home_index.html" style="text-decoration: none; color: inherit;">
+            <img src="{% static 'assets/logo.jpg' %}" alt="RoyalWheels Car">
+          </a>
+      </section>
+
+
+      <div class="logo">
+        <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+      </div>
+
+      <ul class="nav-links">
+        <li>
+          <a href="Home_index.html" style="text-decoration: none; color: inherit;">
+            Home
+          </a>
+        </li>
+        <li>
+          <a href="Bikes.html" style="text-decoration: none; color: inherit;">
+            Bikes
+          </a>
+        </li>
+        <li>
+          <a href="Car.html" style="text-decoration: none; color: inherit;">
+            Cars
+          </a>
+        </li>
+        <li>
+          <a href="MyBooking.html" style="text-decoration: none; color: inherit;">
+            My Bookings
+          </a>
+        </li>
+      </ul>
+
+
+      <!-- CHANGED CLASS NAME -->
+      <div class="nav-actions">
+        <div class="search-wrapper">
+          <input type="text" placeholder="Search cars" />
+          <span class="search-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+        </div>
+
+
+        <button class="btn-outline" onclick="window.location.href='/admin-login/'">Admin</button>
+        <button class="btn-primary" onclick="window.location.href='login.html'">Login</button>
+      </div>
+    </nav>
+
+<section class="my-bookings">
+
+  <div class="booking-header">
+      <h1>My Bookings</h1>
+
+      <select id="sortSelect">
+        <option value="date">Sort by Date</option>
+        <option value="price">Sort by Price</option>
+        <option value="name">Sort by Bikes</option>
+        <option value="type">Sort by cars</option>
+      </select>
+    </div>
+
+    <div id="bookingsContainer"></div>
+
+    <!-- Feedback Modal -->
+    <div class="modal-backdrop" id="feedbackModal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+        <div class="modal-header">
+          <h2 id="feedbackTitle">Share Feedback</h2>
+          <button type="button" class="modal-close" id="closeFeedbackModal" aria-label="Close">×</button>
+        </div>
+
+        <p class="modal-sub" id="feedbackSubtitle">Rate your experience and write feedback.</p>
+
+        <div class="star-rating" id="starRating">
+          <input type="radio" id="star5" name="rating" value="5">
+          <label for="star5" title="5 stars">★</label>
+          <input type="radio" id="star4" name="rating" value="4">
+          <label for="star4" title="4 stars">★</label>
+          <input type="radio" id="star3" name="rating" value="3">
+          <label for="star3" title="3 stars">★</label>
+          <input type="radio" id="star2" name="rating" value="2">
+          <label for="star2" title="2 stars">★</label>
+          <input type="radio" id="star1" name="rating" value="1">
+          <label for="star1" title="1 star">★</label>
+        </div>
+
+        <textarea id="feedbackMessage" class="modal-textarea" rows="4" placeholder="Write your feedback..."></textarea>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="cancelFeedback">Cancel</button>
+          <button type="button" class="btn-primary" id="submitFeedback">Send Feedback</button>
+        </div>
+      </div>
+    </div>
+
+</section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+        </div>
+        <p>
+          Premium car and bike rental service with a wide selection of luxury and everyday vehicles.
+        </p>
+
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="X">X</a>
+          <a href="#" aria-label="Email">Mail</a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <a href="Home_index.html">Home</a>
+        <a href="Car.html">Browse Cars</a>
+        <a href="Bikes.html">Browse Bikes</a>
+        <a href="#">List Your Vehicle</a>
+        <a href="#">About Us</a>
+      </div>
+
+      <div class="footer-links">
+        <h4>Resources</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Insurance</a>
+      </div>
+
+      <div class="footer-contact">
+        <h4>Contact</h4>
+        <p>LPU, Phagwara, Punjab</p>
+        <p>+91 63764 47286</p>
+        <p>support@royalwheels.com</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 RoyalWheels. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </footer>
+
+
+<script src="{% static 'js/navbar.js' %}"></script>
+<script src="{% static 'js/mybooking.js' %}?v=20260306g"></script>
+
+
+</body>
+</html>

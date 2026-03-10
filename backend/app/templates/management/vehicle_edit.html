@@ -1,0 +1,56 @@
+{% extends "management/base.html" %}
+
+{% block title %}Edit Vehicle{% endblock %}
+
+{% block content %}
+<section class="panel page-hero">
+    <div class="panel-head">
+        <h1>Edit Vehicle</h1>
+        <span class="chip">{{ vehicle.get_category_display }}</span>
+    </div>
+    <p class="muted">{{ vehicle.brand }} {{ vehicle.name }} | {{ vehicle.registration_number }}</p>
+</section>
+
+<section class="panel form-panel">
+    <div class="panel-head">
+        <h2>Vehicle Details</h2>
+    </div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <small class="error">{{ field.errors|striptags }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="field">
+            <label for="id_gallery_images">Add More Gallery Images</label>
+            <input type="file" id="id_gallery_images" name="gallery_images" multiple accept="image/*">
+        </div>
+        <button type="submit">Update Vehicle</button>
+        <a href="{% url 'vehicle_manage' %}" class="mini-btn">Back</a>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <h2>Current Gallery</h2>
+    </div>
+    <div class="image-grid">
+        {% for image in vehicle.images.all %}
+            <div class="image-card">
+                <img src="{{ image.image.url }}" alt="Vehicle image">
+                <form method="post" action="{% url 'vehicle_image_delete' image.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="mini-btn danger-btn">Remove</button>
+                </form>
+            </div>
+        {% empty %}
+            <p>No gallery images yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

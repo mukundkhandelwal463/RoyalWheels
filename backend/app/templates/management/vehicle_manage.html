@@ -1,0 +1,99 @@
+{% extends "management/base.html" %}
+
+{% block title %}Vehicles{% endblock %}
+
+{% block content %}
+<section class="panel page-hero">
+    <div class="panel-head">
+        <h1>Vehicle Management</h1>
+        <span class="chip">{{ vehicles|length }} Vehicles</span>
+    </div>
+    <p class="muted">Add cars and bikes, then track availability and updates in one place.</p>
+</section>
+
+<section class="split split-wide">
+    <article class="panel form-panel">
+        <div class="panel-head">
+            <h2>Add Vehicle</h2>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="error">{{ field.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <div class="field">
+                <label for="id_gallery_images">Vehicle Gallery Images (Multiple)</label>
+                <input type="file" id="id_gallery_images" name="gallery_images" multiple accept="image/*">
+                <small class="muted">You can choose multiple photos from your PC.</small>
+            </div>
+            <button type="submit">Save Vehicle</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="panel-head">
+            <h2>My Vehicles</h2>
+        </div>
+        <div class="table-wrap modern-table-wrap">
+            <table class="modern-table">
+                <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Reg No</th>
+                    <th>Rent/Day</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for vehicle in vehicles %}
+                    <tr>
+                        <td>
+                            {% if vehicle.photo %}
+                                <img src="{{ vehicle.photo.url }}" alt="{{ vehicle.name }}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;">
+                            {% elif vehicle.images.first %}
+                                <img src="{{ vehicle.images.first.image.url }}" alt="{{ vehicle.name }}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;">
+                            {% elif vehicle.photo_url %}
+                                <img src="{{ vehicle.photo_url }}" alt="{{ vehicle.name }}" style="width:52px;height:38px;object-fit:cover;border-radius:8px;">
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ vehicle.get_category_display }}</td>
+                        <td>{{ vehicle.brand }} {{ vehicle.name }}</td>
+                        <td>{{ vehicle.registration_number }}</td>
+                        <td>Rs {{ vehicle.rent_per_day }}</td>
+                        <td>
+                            {% if vehicle.is_available %}
+                                <span class="status-badge is-ok">Available</span>
+                            {% else %}
+                                <span class="status-badge is-off">Unavailable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'vehicle_edit' vehicle.id %}" class="mini-btn">Edit</a>
+                            <form method="post" action="{% url 'vehicle_delete' vehicle.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="mini-btn danger-btn" onclick="return confirm('Delete this vehicle?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="empty-row">No vehicles added yet.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+{% endblock %}

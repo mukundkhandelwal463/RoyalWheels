@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <!-- GOOGLE FONT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <meta charset="UTF-8" />
+  <title>Book Vehicle | RoyalWheels</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'css/Book_now_style.css' %}" />
+  <!-- <link rel="stylesheet" href="{% static 'css/navbar.css' %}" /> -->
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}" />
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+      <section class="hero-image">
+          <a href="Home_index.html" style="text-decoration: none; color: inherit;">
+            <img src="{% static 'assets/logo.jpg' %}" alt="RoyalWheels Car">
+          </a>
+      </section>
+
+
+      <div class="logo">
+        <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+      </div>
+
+      <ul class="nav-links">
+        <li>
+          <a href="Home_index.html" style="text-decoration: none; color: inherit;">
+            Home
+          </a>
+        </li>
+        <li>
+          <a href="Bikes.html" style="text-decoration: none; color: inherit;">
+            Bikes
+          </a>
+        </li>
+        <li>
+          <a href="Car.html" style="text-decoration: none; color: inherit;">
+            Cars
+          </a>
+        </li>
+        <li>
+          <a href="MyBooking.html" style="text-decoration: none; color: inherit;">
+            My Bookings
+          </a>
+        </li>
+      </ul>
+
+
+      <!-- CHANGED CLASS NAME -->
+      <div class="nav-actions">
+        <div class="search-wrapper">
+          <input type="text" placeholder="Search cars" />
+          <span class="search-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+        </div>
+
+
+        <button class="btn-outline" onclick="window.location.href='/admin-login/'">Admin</button>
+        <button class="btn-primary" onclick="window.location.href='login.html'">Login</button>
+      </div>
+    </nav>
+
+
+
+<div class="container">
+
+  <!-- LEFT SIDE -->
+  <div class="vehicle-details">
+    <img src="{% static 'assets/BMW.png' %}" class="vehicle-image" alt="Car Image">
+
+    <h1 class="vehicle-title">BMW X7</h1>
+    <p class="vehicle-sub">XUV · 2021</p>
+
+    <div class="specs">
+      <div class="spec-box">👥 4 Seats</div>
+      <div class="spec-box">⛽ Diesel</div>
+      <div class="spec-box">⚙️ Automatic</div>
+      <div class="spec-box">📍 Law Gate</div>
+    </div>
+
+    <h3>Description</h3>
+    <p class="description">
+      BMW X7 is a premium sedan offering comfort, safety,
+      and excellent fuel efficiency for city and highway travel.
+    </p>
+
+    <h3>Features</h3>
+    <div class="features">
+      <span>✔ 360° Camera</span>
+      <span>✔ GPS</span>
+      <span>✔ Bluetooth</span>
+      <span>✔ Heated Seats</span>
+      <span>✔ Rear View Mirror</span>
+    </div>
+
+    <!-- OWNER INFO -->
+    <div class="owner-card">
+      <h3>Vehicle Owner Details</h3>
+      <p><b>Shop:</b> Royal Wheels Rentals</p>
+      <p><b>Owner:</b> Rahul Sharma</p>
+      <p><b>Phone:</b> +91 98765 43210</p>
+      <p><b>Email:</b> royalwheels@gmail.com</p>
+      <p><b>Address:</b> Law Gate, Phagwara, Punjab</p>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE -->
+  <div class="booking-box">
+    <h2 class="price">₹4000 <span>/ day</span></h2>
+
+    <p class="note">Customer details will be auto-filled from your profile.</p>
+
+    <label>Booking Type</label>
+    <select id="bookingType">
+      <option value="day">Per Day</option>
+      <option value="hour">Per Hour</option>
+    </select>
+
+    <label>Pickup Date</label>
+    <input type="date" id="pickup">
+
+    <label>Return Date</label>
+    <input type="date" id="return">
+    
+
+    <div id="hourlyFields" style="display:none;">
+      <label>Pickup Time</label>
+      <input type="time" id="pickupTime">
+
+      <label>Return Time</label>
+      <input type="time" id="returnTime">
+    </div>
+
+    <p class="total">Total: ₹<span id="totalPrice">0</span></p>
+
+    <button class="book-btn">
+      Book Now
+    </button>
+
+
+    <p class="note">No credit card required to reserve</p>
+  </div>
+
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <span class="logo-royal">Royal</span><span class="logo-wheels">Wheels</span>
+      </div>
+      <p>
+        Premium car and bike rental service with a wide selection of luxury and everyday vehicles.
+      </p>
+
+      <div class="social-icons">
+        <a href="#" aria-label="Facebook">FB</a>
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="Email">Mail</a>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <h4>Quick Links</h4>
+      <a href="Home_index.html">Home</a>
+      <a href="Car.html">Browse Cars</a>
+      <a href="Bikes.html">Browse Bikes</a>
+      <a href="#">List Your Vehicle</a>
+      <a href="#">About Us</a>
+    </div>
+
+    <div class="footer-links">
+      <h4>Resources</h4>
+      <a href="#">Help Center</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Insurance</a>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Contact</h4>
+      <p>LPU, Phagwara, Punjab</p>
+      <p>+91 63764 47286</p>
+      <p>support@royalwheels.com</p>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; 2026 RoyalWheels. All rights reserved.</p>
+    <div class="footer-bottom-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- JS FILES -->
+<script src="{% static 'js/navbar.js' %}"></script>
+<script src="{% static 'js/book_now.js' %}"></script>
+
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Rental Management{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/management.css' %}">
+</head>
+<body>
+<header class="header-wrap">
+    <div class="topbar">
+        <div class="brand"><span class="brand-royal">Royal</span><span class="brand-wheels">Wheels</span></div>
+        <nav class="nav">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'bikes_page' %}">Bikes</a>
+            <a href="{% url 'cars_page' %}">Cars</a>
+            <a href="{% url 'my_bookings_page' %}">My Bookings</a>
+        </nav>
+        <div class="nav-actions">
+            <a class="btn-secondary" href="{% url 'owner_dashboard' %}">Admin</a>
+            <a id="adminLogoutLink" class="btn-primary" href="{% url 'shopkeeper_logout' %}">Logout</a>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    {% if messages %}
+        <section class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </section>
+    {% endif %}
+    <section class="admin-shell">
+        <aside class="sidebar">
+            <a class="photo-wrap" href="{% url 'owner_profile_manage' %}" title="Change profile photo">
+                {% if owner and owner.profile_photo %}
+                    <img id="sidebarProfilePhoto" class="admin-photo" src="{{ owner.profile_photo.url }}" alt="Admin Photo">
+                {% elif owner and owner.profile_photo_url %}
+                    <img id="sidebarProfilePhoto" class="admin-photo" src="{{ owner.profile_photo_url }}" alt="Admin Photo">
+                {% else %}
+                    <div id="sidebarProfilePhoto" class="admin-photo admin-fallback">RW</div>
+                {% endif %}
+                <span class="photo-edit">Edit</span>
+            </a>
+            <h3>{{ owner.business_name|default:"Royal Wheels Rentals" }}</h3>
+            <a class="side-link {% if request.path == '/dashboard/' or request.path == '/admin-dashboard/' %}active{% endif %}" href="{% url 'owner_dashboard' %}">Dashboard</a>
+            <a class="side-link {% if request.path == '/management/vehicles/' %}active{% endif %}" href="{% url 'vehicle_manage' %}">Vehicles</a>
+            <a class="side-link {% if request.path == '/management/bookings/' %}active{% endif %}" href="{% url 'booking_manage' %}">Rentals</a>
+            <a class="side-link {% if request.path == '/management/profile/' %}active{% endif %}" href="{% url 'owner_profile_manage' %}">Profile</a>
+            <a class="side-link {% if request.path == '/management/expenses/' %}active{% endif %}" href="{% url 'expense_manage' %}">Profit</a>
+        </aside>
+        <section class="admin-content">
+            {% block content %}{% endblock %}
+        </section>
+    </section>
+</main>
+
+<script src="{% static 'js/management.js' %}"></script>
+<script>
+    localStorage.setItem("activeRole", "admin");
+    const logoutLink = document.getElementById("adminLogoutLink");
+    if (logoutLink) {
+        logoutLink.addEventListener("click", function () {
+            localStorage.removeItem("activeRole");
+        });
+    }
+</script>
+</body>
+</html>
