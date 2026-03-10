@@ -13,6 +13,7 @@ import urllib.request
 import uuid
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 
 import cloudinary.uploader
 from django.contrib import messages
@@ -74,11 +75,23 @@ def _vehicle_image_url(vehicle):
             pass
 
     if vehicle.photo_url:
-        return vehicle.photo_url
+        candidate = str(vehicle.photo_url).strip()
+        parsed = urllib.parse.urlparse(candidate)
+        media_url = getattr(settings, "MEDIA_URL", "/media/")
+        if parsed.path and media_url and parsed.path.startswith(media_url):
+            relative_media_path = parsed.path[len(media_url):].lstrip("/")
+            absolute_media_path = Path(getattr(settings, "MEDIA_ROOT", "")) / relative_media_path
+            if absolute_media_path.exists():
+                return candidate
+        elif candidate:
+            return candidate
 
+    return _vehicle_fallback_image_url(vehicle)
+
+
+def _vehicle_fallback_image_url(vehicle):
     label = f"{vehicle.brand} {vehicle.name}".lower()
 
-    # Match common names/brands to better default images.
     if any(token in label for token in ["bmw", "x7", "x5"]):
         return static("assets/BMW.png")
     if any(token in label for token in ["hunter", "enfield", "classic", "duke", "r15", "apache", "pulsar"]):
@@ -765,6 +778,7 @@ def vehicle_manage(request):
     vehicles = owner.vehicles.prefetch_related("images").all()
     for vehicle in vehicles:
         vehicle.display_image_url = _vehicle_image_url(vehicle)
+        vehicle.fallback_image_url = _vehicle_fallback_image_url(vehicle)
     return render(
         request,
         "management/vehicle_manage.html",
@@ -792,6 +806,7 @@ def vehicle_edit(request, vehicle_id):
         return redirect("vehicle_manage")
 
     vehicle.display_image_url = _vehicle_image_url(vehicle)
+    vehicle.fallback_image_url = _vehicle_fallback_image_url(vehicle)
 
     return render(
         request,
