@@ -258,6 +258,117 @@ function login() {
   }
 }
 
+function decodeJwtPayload(token) {
+  if (!token || token.split(".").length < 2) {
+    return null;
+  }
+
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((char) => `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`)
+        .join("")
+    );
+    return JSON.parse(json);
+  } catch (error) {
+    console.error("Unable to decode Google credential", error);
+    return null;
+  }
+}
+
+function upsertGoogleCustomer(googleProfile) {
+  const email = String(googleProfile?.email || "").trim().toLowerCase();
+  if (!email) {
+    throw new Error("Google account email is missing.");
+  }
+
+  const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+  const legacyCustomer = JSON.parse(localStorage.getItem("customer") || "null");
+  if (legacyCustomer && !customers.some((c) => c.email === legacyCustomer.email)) {
+    customers.push(legacyCustomer);
+  }
+
+  const fullName = String(googleProfile?.name || googleProfile?.given_name || email.split("@")[0] || "").trim();
+  const picture = String(googleProfile?.picture || "").trim();
+  let matchedUser = customers.find(
+    (customer) => String(customer.email || "").toLowerCase() === email
+  );
+
+  if (!matchedUser) {
+    matchedUser = {
+      name: fullName,
+      email,
+      phone: "",
+      age: "",
+      address: "",
+      license: "",
+      lpuId: "",
+      password: "",
+      profilePhoto: picture
+    };
+    customers.push(matchedUser);
+  } else {
+    matchedUser.name = matchedUser.name || fullName;
+    if (picture) {
+      matchedUser.profilePhoto = picture;
+    }
+  }
+
+  localStorage.setItem("customers", JSON.stringify(customers));
+  localStorage.setItem("customer", JSON.stringify(matchedUser));
+  localStorage.setItem("loggedCustomer", JSON.stringify(matchedUser));
+  localStorage.setItem("activeRole", "customer");
+}
+
+function handleGoogleCredentialResponse(response) {
+  if (localStorage.getItem("activeRole") === "admin") {
+    alert("Admin is currently logged in. Logout from admin first.");
+    window.location.href = "/admin-login/";
+    return;
+  }
+
+  const payload = decodeJwtPayload(response?.credential);
+  if (!payload) {
+    alert("Google sign-in failed. Please try again.");
+    return;
+  }
+
+  try {
+    upsertGoogleCustomer(payload);
+    alert("Login successful!");
+    window.location.href = "Home_index.html";
+  } catch (error) {
+    alert(error.message || "Google login failed.");
+  }
+}
+
+function initializeGoogleSignIn() {
+  const googleClientId = String(window.ROYALWHEELS_GOOGLE_CLIENT_ID || "").trim();
+  const buttonContainer = document.getElementById("googleSignInButton");
+
+  if (!googleClientId || !buttonContainer || !window.google?.accounts?.id) {
+    return;
+  }
+
+  google.accounts.id.initialize({
+    client_id: googleClientId,
+    callback: handleGoogleCredentialResponse,
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
+
+  google.accounts.id.renderButton(buttonContainer, {
+    theme: "outline",
+    size: "large",
+    shape: "rectangular",
+    text: "continue_with",
+    width: 360
+  });
+}
+
 function resetCustomerPassword() {
   if (localStorage.getItem("activeRole") === "admin") {
     alert("Admin is currently logged in. Logout from admin first.");
@@ -324,6 +435,7 @@ function resetCustomerPassword() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initializeGoogleSignIn();
   enforceIndianPhonePrefix("phone");
 
   document.getElementById("sendEmailOtpBtn")?.addEventListener("click", async () => {

@@ -50,10 +50,22 @@
     <p class="switch">
       New user? <a href="signup.html">Create an account</a>
     </p>
+    {% if google_client_id %}
+    <div class="auth-divider"><span>or</span></div>
+    <div class="google-signin">
+      <div id="googleSignInButton"></div>
+    </div>
+    {% endif %}
     <p class="auth-meta"><a href="/forgot-password.html">Forgot Password?</a></p>
   </div>
 </main>
-<script src="{% static 'js/auth.js' %}?v=20260310c"></script>
+{% if google_client_id %}
+<script>
+  window.ROYALWHEELS_GOOGLE_CLIENT_ID = "{{ google_client_id|escapejs }}";
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+{% endif %}
+<script src="{% static 'js/auth.js' %}?v=20260311a"></script>
 <script src="{% static 'js/navbar.js' %}"></script>
 </body>
 </html>
