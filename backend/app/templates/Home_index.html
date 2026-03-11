@@ -94,7 +94,7 @@
         {% for partner in partners %}
           <article class="card">
             <img
-              src="{% if partner.profile_photo %}{{ partner.profile_photo.url }}?v={{ partner.updated_at|date:'U' }}{% elif partner.profile_photo_url %}{{ partner.profile_photo_url }}{% else %}{% static 'assets/logo.jpg' %}{% endif %}"
+              src="{% if partner.profile_photo_url %}{{ partner.profile_photo_url }}{% elif partner.profile_photo %}{{ partner.profile_photo.url }}?v={{ partner.updated_at|date:'U' }}{% else %}{% static 'assets/logo.jpg' %}{% endif %}"
               alt="{{ partner.business_name }}"
               class="provider-img"
             >
