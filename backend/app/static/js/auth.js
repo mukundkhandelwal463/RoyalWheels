@@ -353,6 +353,10 @@ function initializeGoogleSignIn() {
     return;
   }
 
+  if (buttonContainer.dataset.initialized === "true") {
+    return;
+  }
+
   google.accounts.id.initialize({
     client_id: googleClientId,
     callback: handleGoogleCredentialResponse,
@@ -367,7 +371,11 @@ function initializeGoogleSignIn() {
     text: "continue_with",
     width: 360
   });
+
+  buttonContainer.dataset.initialized = "true";
 }
+
+window.initializeGoogleSignIn = initializeGoogleSignIn;
 
 function resetCustomerPassword() {
   if (localStorage.getItem("activeRole") === "admin") {

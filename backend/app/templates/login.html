@@ -63,9 +63,9 @@
 <script>
   window.ROYALWHEELS_GOOGLE_CLIENT_ID = "{{ google_client_id|escapejs }}";
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="window.initializeGoogleSignIn && window.initializeGoogleSignIn()"></script>
 {% endif %}
-<script src="{% static 'js/auth.js' %}?v=20260311a"></script>
+<script src="{% static 'js/auth.js' %}?v=20260311b"></script>
 <script src="{% static 'js/navbar.js' %}"></script>
 </body>
 </html>
