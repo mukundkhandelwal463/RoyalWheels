@@ -56,4 +56,7 @@ urlpatterns = [
     path("api/feedback/submit/", views.feedback_submit, name="feedback_submit"),
     path("api/customers/profile/upsert/", views.customer_profile_upsert, name="customer_profile_upsert"),
     path("api/customers/profile/update-email/", views.customer_profile_update_email, name="customer_profile_update_email"),
+    path("api/customers/login/", views.customer_login, name="customer_login"),
+    path("api/customers/signup/", views.customer_signup, name="customer_signup"),
+    path("api/customers/reset-password/", views.reset_customer_password, name="reset_customer_password"),
 ]

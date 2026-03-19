@@ -246,6 +246,7 @@ class CustomerProfile(TimestampedModel):
     address = models.TextField(blank=True)
     lpu_id = models.CharField(max_length=60, blank=True, null=True, unique=True)
     license_number = models.CharField(max_length=60, blank=True)
+    password = models.CharField(max_length=128, blank=True) # Added password field
     driving_license_doc = models.FileField(
         upload_to="customer_docs/licenses/",
         blank=True,

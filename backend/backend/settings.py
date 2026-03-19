@@ -1,4 +1,5 @@
 import os
+import socket
 from pathlib import Path
 
 import dj_database_url
@@ -42,23 +43,38 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() in {"1", "true", "yes", "on"}
 
+ALLOWED_HOSTS = [
+    "mukund462.pythonanywhere.com",
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "[::1]",
+]
+
 _allowed_hosts = os.getenv("DJANGO_ALLOWED_HOSTS", "").strip()
 if _allowed_hosts:
-    ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(",") if h.strip()]
-else:
-    ALLOWED_HOSTS = [
-        "mukund462.pythonanywhere.com",
-        "localhost",
-        "127.0.0.1",
-        "0.0.0.0",
-        "[::1]",
-    ]
+    ALLOWED_HOSTS.extend([h.strip() for h in _allowed_hosts.split(",") if h.strip()])
 
 _csrf_origins = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").strip()
 if _csrf_origins:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
-elif "mukund462.pythonanywhere.com" in ALLOWED_HOSTS:
-    CSRF_TRUSTED_ORIGINS = ["https://mukund462.pythonanywhere.com"]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://mukund462.pythonanywhere.com",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
+
+# Automatically allow the current machine's IP (if accessing from LAN)
+try:
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    CSRF_TRUSTED_ORIGINS.append(f"http://{local_ip}:8000")
+    if local_ip not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(local_ip)
+except Exception:
+    pass
+
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
@@ -196,7 +212,12 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-repl
 
 # SMS OTP delivery via Twilio
 FAST2SMS_API_KEY = os.getenv("FAST2SMS_API_KEY", "")
-OTP_DEV_FALLBACK = os.getenv("OTP_DEV_FALLBACK", str(DEBUG)).lower() in {"1", "true", "yes", "on"}
+
+# OTP Dev Fallback logic (disable if real credentials exist)
+OTP_DEV_FALLBACK_DEFAULT = str(DEBUG)
+if EMAIL_HOST_PASSWORD:
+    OTP_DEV_FALLBACK_DEFAULT = "False"
+OTP_DEV_FALLBACK = os.getenv("OTP_DEV_FALLBACK", OTP_DEV_FALLBACK_DEFAULT).lower() in {"1", "true", "yes", "on"}
 
 # Razorpay (use Test/Live keys via environment)
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")

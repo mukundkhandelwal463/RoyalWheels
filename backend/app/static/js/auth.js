@@ -115,7 +115,7 @@ async function verifyOtp(flow, channel, target, code) {
   alert(`${channel.toUpperCase()} OTP verified.`);
 }
 
-function signup() {
+async function signup() {
   if (localStorage.getItem("activeRole") === "admin") {
     alert("Admin is currently logged in. Logout from admin first.");
     window.location.href = "/admin-login/";
@@ -197,13 +197,11 @@ function signup() {
   };
 
   try {
-    customers.push(user);
-    localStorage.setItem("customers", JSON.stringify(customers));
-    localStorage.setItem("customer", JSON.stringify(user));
-    alert("Signup successful! Please login.");
+    const response = await postJson("/api/customers/signup/", user);
+    alert(response.message || "Signup successful! Please login.");
     window.location.href = "login.html";
   } catch (error) {
-    alert("Error saving account. Please try again.");
+    alert(error.message || "Error saving account. Please try again.");
     console.error("Signup error:", error);
   }
 }
@@ -228,34 +226,23 @@ function login() {
     return;
   }
 
-  const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-  const legacyCustomer = JSON.parse(localStorage.getItem("customer") || "null");
-  if (legacyCustomer && !customers.some((c) => c.email === legacyCustomer.email)) {
-    customers.push(legacyCustomer);
-    localStorage.setItem("customers", JSON.stringify(customers));
-  }
-
-  if (customers.length === 0) {
-    alert("No account found. Please signup first.");
-    return;
-  }
-
   const normalizedInput = String(email).toLowerCase();
-  const matchedUser = customers.find(
-    (customer) =>
-      (String(customer.email || "").toLowerCase() === normalizedInput ||
-        String(customer.lpuId || "").toLowerCase() === normalizedInput) &&
-      password === customer.password
-  );
-
-  if (matchedUser) {
-    localStorage.setItem("loggedCustomer", JSON.stringify(matchedUser));
-    localStorage.setItem("activeRole", "customer");
-    alert("Login successful!");
-    window.location.href = "Home_index.html";
-  } else {
-    alert("Invalid email/ID or password. Please try again.");
-  }
+  
+  postJson("/api/customers/login/", {
+    email: normalizedInput,
+    password: password
+  }).then(response => {
+    if (response.success && response.user) {
+      localStorage.setItem("loggedCustomer", JSON.stringify(response.user));
+      localStorage.setItem("activeRole", "customer");
+      alert("Login successful!");
+      window.location.href = "Home_index.html";
+    } else {
+      alert("Invalid email/ID or password. Please try again.");
+    }
+  }).catch(error => {
+    alert(error.message || "Invalid email/ID or password. Please try again.");
+  });
 }
 
 function decodeJwtPayload(token) {
@@ -411,35 +398,18 @@ function resetCustomerPassword() {
     return;
   }
 
-  const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-  const legacyCustomer = JSON.parse(localStorage.getItem("customer") || "null");
-  if (legacyCustomer && !customers.some((c) => c.email === legacyCustomer.email)) {
-    customers.push(legacyCustomer);
-  }
-
   const normalizedEmail = String(email).toLowerCase();
-  const userIndex = customers.findIndex(
-    (customer) => String(customer.email || "").toLowerCase() === normalizedEmail
-  );
 
-  if (userIndex === -1) {
-    alert("Invalid user. Please create an account first.");
-    return;
-  }
-
-  customers[userIndex].password = password;
-  localStorage.setItem("customers", JSON.stringify(customers));
-  localStorage.setItem("customer", JSON.stringify(customers[userIndex]));
-
-  const loggedCustomer = JSON.parse(localStorage.getItem("loggedCustomer") || "null");
-  if (loggedCustomer && String(loggedCustomer.email || "").toLowerCase() === normalizedEmail) {
-    loggedCustomer.password = password;
-    localStorage.setItem("loggedCustomer", JSON.stringify(loggedCustomer));
-  }
-
-  alert("Password updated successfully. Please login.");
-  resetOtpFlowState("customerForgot", "email");
-  window.location.href = "/login.html";
+  postJson("/api/customers/reset-password/", {
+    email: normalizedEmail,
+    password: password
+  }).then(response => {
+    alert("Password updated successfully. Please login.");
+    resetOtpFlowState("customerForgot", "email");
+    window.location.href = "/login.html";
+  }).catch(error => {
+    alert(error.message || "Unable to reset password.");
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

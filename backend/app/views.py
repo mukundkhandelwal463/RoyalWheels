@@ -18,6 +18,7 @@ from pathlib import Path
 import cloudinary.uploader
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -1834,3 +1835,110 @@ def create_booking(request):
         },
         status=201,
     )
+
+
+@csrf_exempt
+@require_POST
+def customer_signup(request):
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON body.")
+
+    name = (payload.get("name") or "").strip()
+    email = (payload.get("email") or "").strip().lower()
+    password = payload.get("password") or ""
+    lpu_id = (payload.get("lpu_id") or payload.get("lpuId") or "").strip().lower()
+
+    if not name or not email or not password:
+        return HttpResponseBadRequest("Name, email and password are required.")
+
+    if CustomerProfile.objects.filter(email__iexact=email).exists():
+        return HttpResponseBadRequest("An account with this email already exists.")
+    
+    if lpu_id and CustomerProfile.objects.filter(lpu_id__iexact=lpu_id).exists():
+        return HttpResponseBadRequest("An account with this LPU ID already exists.")
+
+    if not _is_otp_verified(request, "customer_signup", "email", email):
+        return HttpResponseBadRequest("Please verify your email OTP before signup.")
+
+    profile = CustomerProfile.objects.create(
+        name=name,
+        email=email,
+        password=make_password(password),
+        phone=(payload.get("phone") or "").strip(),
+        age=payload.get("age"),
+        address=(payload.get("address") or "").strip(),
+        lpu_id=lpu_id or None,
+        license_number=(payload.get("license") or "").strip(),
+    )
+
+    return JsonResponse({"success": True, "message": "Signup successful! Please login."})
+
+
+@csrf_exempt
+@require_POST
+def customer_login(request):
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON body.")
+
+    identifier = (payload.get("email") or "").strip().lower()
+    password = payload.get("password") or ""
+
+    if not identifier or not password:
+        return HttpResponseBadRequest("Email/ID and password are required.")
+
+    profile = CustomerProfile.objects.filter(
+        Q(email__iexact=identifier) | Q(lpu_id__iexact=identifier)
+    ).first()
+
+    if profile and (check_password(password, profile.password) or profile.password == password):
+        # Auto-upgrade plain-text password if found
+        if profile.password == password and not password.startswith("pbkdf2_"):
+             profile.password = make_password(password)
+             profile.save(update_fields=["password"])
+
+        return JsonResponse({
+            "success": True,
+            "user": {
+                "name": profile.name,
+                "email": profile.email,
+                "phone": profile.phone,
+                "age": profile.age,
+                "address": profile.address,
+                "license": profile.license_number,
+                "lpuId": profile.lpu_id or "",
+                "profilePhoto": profile.driving_license_doc_url,
+            }
+        })
+    else:
+        return HttpResponseBadRequest("Invalid email/ID or password.")
+
+
+@csrf_exempt
+@require_POST
+def reset_customer_password(request):
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("Invalid JSON body.")
+
+    email = (payload.get("email") or "").strip().lower()
+    password = payload.get("password") or ""
+
+    if not email or not password:
+        return HttpResponseBadRequest("Email and new password are required.")
+
+    if not _is_otp_verified(request, "customer_forgot", "email", email):
+        return HttpResponseBadRequest("Please verify reset email OTP first.")
+
+    profile = CustomerProfile.objects.filter(email__iexact=email).first()
+    if not profile:
+        return HttpResponseBadRequest("Account not found.")
+
+    profile.password = make_password(password)
+    profile.save(update_fields=["password", "updated_at"])
+
+    return JsonResponse({"success": True, "message": "Password reset successfully."})
