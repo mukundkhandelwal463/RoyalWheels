@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/auth.css' %}">
   <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+  <script src="{% static 'js/custom_alert.js' %}"></script>
 </head>
 <body class="login-page">
 <nav class="navbar">
@@ -52,8 +53,20 @@
     </p>
     {% if google_client_id %}
     <div class="auth-divider"><span>or</span></div>
-    <div class="google-signin">
-      <div id="googleSignInButton"></div>
+    <div id="g_id_onload"
+         data-client_id="{{ google_client_id }}"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="handleGoogleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="outline"
+         data-text="signin_with"
+         data-size="large"
+         data-logo_alignment="left">
     </div>
     {% endif %}
     <p class="auth-meta"><a href="/forgot-password.html">Forgot Password?</a></p>
@@ -63,9 +76,9 @@
 <script>
   window.ROYALWHEELS_GOOGLE_CLIENT_ID = "{{ google_client_id|escapejs }}";
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer onload="window.initializeGoogleSignIn && window.initializeGoogleSignIn()"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 {% endif %}
-<script src="{% static 'js/auth.js' %}?v=20260311b"></script>
+<script src="{% static 'js/auth.js' %}?v=20260523"></script>
 <script src="{% static 'js/navbar.js' %}"></script>
 </body>
 </html>

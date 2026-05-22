@@ -92,6 +92,7 @@ if not DEBUG and RENDER_EXTERNAL_HOSTNAME:
 # Application definition
 
 INSTALLED_APPS = [
+    'django_prometheus',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -102,6 +103,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -110,6 +112,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -151,6 +154,17 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+_prometheus_db_backends = {
+    "django.db.backends.postgresql": "django_prometheus.db.backends.postgresql",
+    "django.db.backends.postgresql_psycopg2": "django_prometheus.db.backends.postgresql",
+    "django.db.backends.sqlite3": "django_prometheus.db.backends.sqlite3",
+    "django.db.backends.mysql": "django_prometheus.db.backends.mysql",
+}
+for database in DATABASES.values():
+    engine = database.get("ENGINE")
+    if engine in _prometheus_db_backends:
+        database["ENGINE"] = _prometheus_db_backends[engine]
 
 
 # Password validation
@@ -250,3 +264,7 @@ if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+ 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+

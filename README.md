@@ -1,43 +1,53 @@
-# RoyalWheels Render Deployment
+# RoyalWheels 🚗🏍️
 
-This project is a Django app in `backend/` and is now set up for Render.
+RoyalWheels is a comprehensive vehicle rental management platform (Cars & Bikes) built with **Django** on the backend and modern vanilla HTML/CSS/JS for the frontend.
 
-## What was added
+## Key Features
+- **Customer Portal**: Book vehicles, manage profiles, multi-login support (Google Sign-In + OTP Email verification).
+- **Beautiful UI/UX**: Custom glassmorphism popups, stunning vehicle cards, dynamic search.
+- **Admin & Partner Portals**: Rental agencies can manage their own fleet, handle bookings, track revenue, and update vehicle status.
+- **Payment Gateway**: Integrated with Razorpay for secure checkout flows.
+- **Cloud Storage**: Cloudinary integration for scalable vehicle image storage.
 
-- Production database support through `DATABASE_URL`
-- Static file serving through WhiteNoise
-- Gunicorn for the Render web service
-- A `render.yaml` blueprint for one-click setup
+## DevOps & Cloud Infrastructure
+This project is fully containerized and includes a comprehensive DevOps scaffold for enterprise-grade deployment:
+- **Docker**: Ready-to-go `docker-compose.yml` and `Dockerfile`.
+- **Kubernetes**: Standard manifests in `k8s/` for Deployments, Services, Ingress, and HPAs.
+- **Terraform**: AWS infrastructure as code in `terraform/` (EKS, RDS, VPC, ECR).
+- **Jenkins**: CI/CD pipeline defined in `Jenkinsfile`.
+- **Observability**: Prometheus metrics endpoint (`/metrics`), `/healthz/` endpoint, and Grafana dashboards (`grafana/dashboards/royalwheels-overview.json`).
+- **Render**: Included `render.yaml` blueprint for one-click PaaS deployment.
 
-## Render setup
+See `docs-devops.md` for deep-dive setup and deployment instructions for AWS and Kubernetes.
 
-1. Push this repository to GitHub.
-2. In Render, create a new Blueprint and select this repository.
-3. Render will create:
-   - one `web` service for Django
-   - one PostgreSQL database
-4. Set the missing environment variables in Render:
-   - `DJANGO_SECRET_KEY`
-   - `GOOGLE_CLIENT_ID`
-   - `RAZORPAY_KEY_ID`
-   - `RAZORPAY_KEY_SECRET`
-   - `EMAIL_HOST_USER`
-   - `EMAIL_HOST_PASSWORD`
-   - `DEFAULT_FROM_EMAIL`
-   - `FAST2SMS_API_KEY` if you use it
-   - `CLOUDINARY_URL` for persistent admin-uploaded vehicle images
-5. Deploy.
+## Running Locally
 
-## Manual Render commands
+To spin up the entire application along with PostgreSQL and Prometheus:
 
-- Build command: `cd backend && pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
-- Start command: `cd backend && gunicorn backend.wsgi:application`
+```bash
+docker compose up --build
+```
+This maps the application to `http://localhost:8000`.
 
-## Notes
+To seed the demo data:
+```bash
+docker compose exec web python manage.py seed_demo --flush
+```
 
-- Do not use SQLite on Render. Attach the provided PostgreSQL database.
-- `backend/.env.example` now contains placeholders only. Put real secrets in Render environment variables, not in git.
-- OTP email delivery uses Gmail SMTP via the configured Django email settings.
-- Admin-uploaded vehicle images are now designed to use Cloudinary when `CLOUDINARY_URL` or the Cloudinary credential variables are set.
-- Existing vehicle records that currently point to missing local files need one re-upload in the admin panel so their `photo_url` is updated to the Cloudinary URL.
-- Other uploaded files still use local media unless you extend Cloudinary usage to those fields too.
+Demo Credentials:
+- **Admin**: admin / admin123
+- **Customer**: mukundkhandelwal463@gmail.com / Demo@123
+- **Partner**: royalwheels_admin / Royal@123
+
+## Environment Variables
+
+For full functionality, ensure the following environment variables are set (either in a `.env` file or in your platform secrets manager):
+
+- `DJANGO_SECRET_KEY`
+- `DATABASE_URL`
+- `GOOGLE_CLIENT_ID`
+- `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET`
+- `EMAIL_HOST_USER` & `EMAIL_HOST_PASSWORD` (for OTP)
+- `CLOUDINARY_URL` (for image uploads)
+
+*(See `backend/.env.example` for placeholders).*

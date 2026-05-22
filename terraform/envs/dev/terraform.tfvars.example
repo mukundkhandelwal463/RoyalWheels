@@ -1,0 +1,5 @@
+project_name = "royalwheels"
+environment  = "dev"
+aws_region   = "ap-south-1"
+db_username  = "royalwheels"
+db_password  = "change-this-strong-password"

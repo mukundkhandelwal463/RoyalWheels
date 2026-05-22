@@ -309,7 +309,9 @@ def _is_otp_verified(request, purpose, channel, target):
 
 def _create_otp(request, purpose, channel, target):
     otp_id = uuid.uuid4().hex
-    code = f"{random.randint(0, 999999):06d}"
+    # In dev/demo mode use a fixed OTP so testers can always use '123456'.
+    allow_dev_fallback = bool(getattr(settings, "OTP_DEV_FALLBACK", False))
+    code = "123456" if allow_dev_fallback else f"{random.randint(0, 999999):06d}"
     store = _otp_session_store(request)
     store[otp_id] = {
         "purpose": str(purpose),

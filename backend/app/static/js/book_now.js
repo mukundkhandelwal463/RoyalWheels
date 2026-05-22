@@ -157,11 +157,13 @@ function handleBooking() {
     return;
   }
 
+  /* 
   if (!user.drivingLicenseDoc || !user.studentIdDoc) {
     alert("Please upload Driving License and College ID Card in Profile before booking.");
     window.location.href = "/profile.html";
     return;
   }
+  */
 
   if (!pickup.value || !returnDate.value) {
     alert("Please select pickup and return dates.");

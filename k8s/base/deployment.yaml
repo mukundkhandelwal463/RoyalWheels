@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: royalwheels-web
+  namespace: royalwheels
+  labels:
+    app: royalwheels-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: royalwheels-web
+  template:
+    metadata:
+      labels:
+        app: royalwheels-web
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: web
+          image: 123456789012.dkr.ecr.ap-south-1.amazonaws.com/royalwheels:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: royalwheels-config
+            - secretRef:
+                name: royalwheels-secrets
+          readinessProbe:
+            httpGet:
+              path: /healthz/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

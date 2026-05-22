@@ -20,12 +20,12 @@ class Command(BaseCommand):
                 "phone": "+91 9000011111",
                 "address": "Phagwara, Punjab",
                 "license": "GST-RW-1022",
-                "profile_photo": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300",
+                "profile_photo": "http://localhost:8000/static/demo_images/mukund_profile_1779476381495.png",
                 "vehicles": [
-                    ("car", "XUV700", "Mahindra", 2024, "RW-CAR-1001", "diesel", 7, "Automatic", 4200),
-                    ("car", "City", "Honda", 2023, "RW-CAR-1002", "petrol", 5, "Manual", 2800),
-                    ("bike", "Hunter 350", "Royal Enfield", 2023, "RW-BIK-1001", "petrol", 2, "Manual", 1200),
-                    ("bike", "Duke 250", "KTM", 2024, "RW-BIK-1002", "petrol", 2, "Manual", 1500),
+                    ("car", "XUV700", "Mahindra", 2024, "RW-CAR-1001", "diesel", 7, "Automatic", 4200, "http://localhost:8000/static/demo_images/xuv700_1779476133784.png"),
+                    ("car", "City", "Honda", 2023, "RW-CAR-1002", "petrol", 5, "Manual", 2800, "http://localhost:8000/static/demo_images/honda_city_1779476148460.png"),
+                    ("bike", "Hunter 350", "Royal Enfield", 2023, "RW-BIK-1001", "petrol", 2, "Manual", 1200, "http://localhost:8000/static/demo_images/hunter_350_1779476262818.png"),
+                    ("bike", "Duke 250", "KTM", 2024, "RW-BIK-1002", "petrol", 2, "Manual", 1500, "http://localhost:8000/static/demo_images/duke_250_1779476286721.png"),
                 ],
             },
             {
@@ -37,12 +37,12 @@ class Command(BaseCommand):
                 "phone": "+91 9000022222",
                 "address": "Jalandhar, Punjab",
                 "license": "GST-SX-2044",
-                "profile_photo": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=300",
+                "profile_photo": "http://localhost:8000/static/demo_images/arjun_profile_1779476397651.png",
                 "vehicles": [
-                    ("car", "Creta", "Hyundai", 2023, "SX-CAR-2001", "petrol", 5, "Automatic", 3200),
-                    ("car", "Harrier", "Tata", 2024, "SX-CAR-2002", "diesel", 5, "Automatic", 3900),
-                    ("bike", "Pulsar N250", "Bajaj", 2024, "SX-BIK-2001", "petrol", 2, "Manual", 1100),
-                    ("bike", "Apache RTR 200", "TVS", 2023, "SX-BIK-2002", "petrol", 2, "Manual", 1050),
+                    ("car", "Creta", "Hyundai", 2023, "SX-CAR-2001", "petrol", 5, "Automatic", 3200, "http://localhost:8000/static/demo_images/creta_1779476180113.png"),
+                    ("car", "Harrier", "Tata", 2024, "SX-CAR-2002", "diesel", 5, "Automatic", 3900, "http://localhost:8000/static/demo_images/harrier_1779476212707.png"),
+                    ("bike", "Pulsar N250", "Bajaj", 2024, "SX-BIK-2001", "petrol", 2, "Manual", 1100, "http://localhost:8000/static/demo_images/pulsar_n250_1779476301905.png"),
+                    ("bike", "Apache RTR 200", "TVS", 2023, "SX-BIK-2002", "petrol", 2, "Manual", 1050, "http://localhost:8000/static/demo_images/apache_rtr_200_1779476316308.png"),
                 ],
             },
             {
@@ -54,12 +54,12 @@ class Command(BaseCommand):
                 "phone": "+91 9000033333",
                 "address": "Law Gate, Phagwara",
                 "license": "GST-KG-3099",
-                "profile_photo": "https://images.unsplash.com/photo-1483721310020-03333e577078?w=300",
+                "profile_photo": "http://localhost:8000/static/demo_images/karan_profile_1779476536598.png",
                 "vehicles": [
-                    ("car", "Verna", "Hyundai", 2023, "KG-CAR-3001", "petrol", 5, "Automatic", 3000),
-                    ("car", "Baleno", "Maruti", 2024, "KG-CAR-3002", "petrol", 5, "Manual", 2300),
-                    ("bike", "R15 V4", "Yamaha", 2023, "KG-BIK-3001", "petrol", 2, "Manual", 1300),
-                    ("bike", "Classic 350", "Royal Enfield", 2024, "KG-BIK-3002", "petrol", 2, "Manual", 1400),
+                    ("car", "Verna", "Hyundai", 2023, "KG-CAR-3001", "petrol", 5, "Automatic", 3000, "http://localhost:8000/static/demo_images/verna_1779476227933.png"),
+                    ("car", "Baleno", "Maruti", 2024, "KG-CAR-3002", "petrol", 5, "Manual", 2300, "http://localhost:8000/static/demo_images/baleno_1779476246195.png"),
+                    ("bike", "R15 V4", "Yamaha", 2023, "KG-BIK-3001", "petrol", 2, "Manual", 1300, "http://localhost:8000/static/demo_images/r15_v4_1779476329902.png"),
+                    ("bike", "Classic 350", "Royal Enfield", 2024, "KG-BIK-3002", "petrol", 2, "Manual", 1400, "http://localhost:8000/static/demo_images/classic_350_1779476366120.png"),
                 ],
             },
         ]
@@ -88,7 +88,7 @@ class Command(BaseCommand):
                 },
             )
 
-            for category, name, brand, year, reg_no, fuel, seats, transmission, rent in partner["vehicles"]:
+            for category, name, brand, year, reg_no, fuel, seats, transmission, rent, photo_url in partner["vehicles"]:
                 Vehicle.objects.update_or_create(
                     registration_number=reg_no,
                     defaults={
@@ -101,6 +101,7 @@ class Command(BaseCommand):
                         "seats": seats,
                         "transmission": transmission,
                         "rent_per_day": rent,
+                        "photo_url": photo_url,
                         "is_available": True,
                         "is_verified": True,
                     },
