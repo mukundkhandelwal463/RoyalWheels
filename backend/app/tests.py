@@ -67,6 +67,7 @@ class OwnerProfitTests(TestCase):
     EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend",
     ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"],
     DEBUG=True,
+    SECURE_SSL_REDIRECT=False,
 )
 class OtpFlowTests(TestCase):
     def test_email_otp_send_and_verify(self):
@@ -96,6 +97,7 @@ class OtpFlowTests(TestCase):
     RAZORPAY_KEY_SECRET="dummy_secret",
     ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"],
     DEBUG=True,
+    SECURE_SSL_REDIRECT=False,
 )
 class RazorpayVerifyTests(TestCase):
     def setUp(self):
