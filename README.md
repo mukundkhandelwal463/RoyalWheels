@@ -19,6 +19,20 @@ The system supports Customers, Rental Partners, and Administrators with dedicate
 
 ---
 
+## ☁️ DevOps & Cloud Infrastructure
+This project is fully containerized and includes a comprehensive DevOps scaffold for enterprise-grade deployment:
+- **CI/CD Pipeline**: Automated GitHub Actions workflow (`.github/workflows/deploy.yml`) testing, building Docker containers to GHCR, and deploying automatically to AWS EC2 on every push.
+- **Docker**: Ready-to-go `docker-compose.yml`, `docker-compose.prod.yml`, and `Dockerfile`.
+- **Nginx Reverse Proxy**: Production Nginx configuration in `nginx/nginx.conf`.
+- **AWS Infrastructure**: Pre-configured Terraform scripts for EC2 (`terraform/ec2/`) and EKS (`terraform/`).
+- **Observability**: Prometheus metrics endpoint (`/metrics`), `/healthz/` endpoint, and Grafana dashboards (`grafana/dashboards/royalwheels-overview.json`).
+- **Kubernetes**: Standard manifests in `k8s/` for Deployments, Services, Ingress, and HPAs.
+
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for step-by-step AWS EC2 deployment & GitHub Actions setup.
+See `docs-devops.md` for historical deep-dive setup for AWS EKS and Kubernetes.
+
+---
+
 ## ✨ Key Features
 
 ### Customer Portal

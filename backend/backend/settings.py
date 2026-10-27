@@ -140,11 +140,19 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 if DATABASE_URL:
+    db_ssl = os.getenv("DATABASE_SSL_REQUIRE", "").strip()
+    if db_ssl:
+        ssl_require = db_ssl.lower() in {"1", "true", "yes", "on"}
+    elif "sslmode=disable" in DATABASE_URL:
+        ssl_require = False
+    else:
+        ssl_require = not DEBUG
+
     DATABASES = {
         'default': dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=not DEBUG,
+            ssl_require=ssl_require,
         )
     }
 else:

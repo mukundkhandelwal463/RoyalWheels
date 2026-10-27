@@ -12,3 +12,12 @@ __pycache__/
 .idea/
 .vscode/
 *.log
+*.pem
+*.key
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform.lock.hcl
