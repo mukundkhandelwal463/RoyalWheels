@@ -2,10 +2,10 @@ pipeline {
   agent any
 
   environment {
-    AWS_REGION = 'ap-south-1'
-    ECR_REPOSITORY = 'royalwheels'
-    EKS_CLUSTER = 'royalwheels-dev'
-    IMAGE_TAG = "${env.BUILD_NUMBER}"
+    EC2_HOST = '16.4.56.220'
+    EC2_USER = 'ubuntu'
+    SSH_KEY = '/var/jenkins_home/.ssh/royalwheels-key.pem'
+    IMAGE_NAME = 'royalwheels:prod'
   }
 
   stages {
@@ -19,11 +19,11 @@ pipeline {
       steps {
         dir('backend') {
           sh '''
-            python3 -m venv venv
+            python3 -m venv venv || true
             . venv/bin/activate
             python3 -m pip install --upgrade pip
             pip3 install -r requirements.txt
-            python3 manage.py test
+            DJANGO_SECRET_KEY="test" DJANGO_DEBUG="True" python3 manage.py test app
           '''
         }
       }
@@ -31,30 +31,35 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh "docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} ."
+        sh "docker build -t ${IMAGE_NAME} ."
       }
     }
 
-    stage('Push to AWS ECR') {
+    stage('Deploy to EC2') {
       steps {
-        withCredentials([string(credentialsId: 'aws-account-id', variable: 'AWS_ACCOUNT_ID')]) {
-          sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-          sh "docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
-          sh "docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
-          sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
-          sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
-        }
-      }
-    }
+        sh '''
+          echo "Syncing configs to EC2..."
+          scp -i ${SSH_KEY} -o StrictHostKeyChecking=no docker-compose.prod.yml ${EC2_USER}@${EC2_HOST}:/home/ubuntu/royalwheels/docker-compose.prod.yml
+          scp -i ${SSH_KEY} -o StrictHostKeyChecking=no nginx/nginx.conf ${EC2_USER}@${EC2_HOST}:/home/ubuntu/royalwheels/nginx/nginx.conf
 
-    stage('Deploy to EKS') {
-      steps {
-        withCredentials([string(credentialsId: 'aws-account-id', variable: 'AWS_ACCOUNT_ID')]) {
-          sh "aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER}"
-          sh 'kubectl apply -k k8s/base'
-          sh "kubectl -n royalwheels set image deployment/royalwheels-web web=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG} migrate=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}"
-          sh 'kubectl -n royalwheels rollout status deployment/royalwheels-web --timeout=180s'
-        }
+          echo "Deploying on EC2..."
+          ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} """
+            set -e
+            cd /home/ubuntu/royalwheels/repo
+            git fetch origin master
+            git reset --hard origin/master
+            docker build -t royalwheels:prod /home/ubuntu/royalwheels/repo
+            cd /home/ubuntu/royalwheels
+            APP_IMAGE=royalwheels:prod docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
+            docker compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+            docker image prune -f
+          """
+
+          echo "Verifying Health Check on http://${EC2_HOST}/healthz/..."
+          curl --retry 5 --retry-delay 5 --retry-connrefused -f "http://${EC2_HOST}/healthz/"
+          echo "RoyalWheels deployed to EC2 successfully via Jenkins!"
+        '''
       }
     }
   }
