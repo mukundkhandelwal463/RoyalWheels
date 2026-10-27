@@ -51,6 +51,7 @@ pipeline {
             git fetch origin master
             git reset --hard origin/master
             docker build -t royalwheels:prod /home/ubuntu/royalwheels/repo
+            chmod -R 777 /home/ubuntu/royalwheels/grafana /home/ubuntu/royalwheels/prometheus || true
             cd /home/ubuntu/royalwheels
             APP_IMAGE=royalwheels:prod docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
