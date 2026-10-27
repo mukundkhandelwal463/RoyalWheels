@@ -83,13 +83,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Copy Docker Compose & Nginx configs to EC2
+      - name: Copy Docker Compose, Nginx, Prometheus & Grafana configs to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER || 'ubuntu' }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.prod.yml,nginx/nginx.conf"
+          source: "docker-compose.prod.yml,nginx/nginx.conf,prometheus/**,grafana/**"
           target: "/home/ubuntu/royalwheels"
 
       - name: Deploy & Restart Containers on EC2

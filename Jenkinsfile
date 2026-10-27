@@ -41,6 +41,8 @@ pipeline {
           echo "Syncing configs to EC2..."
           scp -i ${SSH_KEY} -o StrictHostKeyChecking=no docker-compose.prod.yml ${EC2_USER}@${EC2_HOST}:/home/ubuntu/royalwheels/docker-compose.prod.yml
           scp -i ${SSH_KEY} -o StrictHostKeyChecking=no nginx/nginx.conf ${EC2_USER}@${EC2_HOST}:/home/ubuntu/royalwheels/nginx/nginx.conf
+          scp -r -i ${SSH_KEY} -o StrictHostKeyChecking=no prometheus ${EC2_USER}@${EC2_HOST}:/home/ubuntu/royalwheels/
+          scp -r -i ${SSH_KEY} -o StrictHostKeyChecking=no grafana ${EC2_USER}@${EC2_HOST}:/home/ubuntu/royalwheels/
 
           echo "Deploying on EC2..."
           ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} """
